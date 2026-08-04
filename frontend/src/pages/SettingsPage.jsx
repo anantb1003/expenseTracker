@@ -4,24 +4,28 @@ import { useTheme } from '../context/ThemeContext';
 import { useCurrency } from '../context/CurrencyContext';
 import Button from '../components/common/Button';
 import Toast from '../components/common/Toast';
-import { Settings, User, DollarSign, Moon, Sun, Shield, CheckCircle } from 'lucide-react';
+import { User, Moon, Sun, Shield } from 'lucide-react';
 
 const SettingsPage = () => {
   const { user, updateProfile } = useAuth();
   const { isDark, toggleTheme } = useTheme();
-  const { selectedCurrency, setSelectedCurrency, availableCurrencies } = useCurrency();
+  const { selectedCurrency, setSelectedCurrency, availableCurrencies = ['INR'] } = useCurrency();
 
   const [name, setName] = useState(user?.name || '');
-  const [currency, setCurrency] = useState(user?.currency || selectedCurrency);
+  const [currency, setCurrency] = useState(user?.currency || selectedCurrency || 'INR');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState(null);
+
+  const currenciesList = availableCurrencies && Array.isArray(availableCurrencies) ? availableCurrencies : ['INR'];
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
       await updateProfile({ name, currency });
-      setSelectedCurrency(currency);
+      if (typeof setSelectedCurrency === 'function') {
+        setSelectedCurrency(currency);
+      }
       setToast({ type: 'success', message: 'Profile & currency settings saved successfully!' });
     } catch (err) {
       setToast({ type: 'error', message: 'Failed to update profile settings' });
@@ -89,9 +93,9 @@ const SettingsPage = () => {
               onChange={(e) => setCurrency(e.target.value)}
               className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             >
-              {availableCurrencies.map((c) => (
+              {currenciesList.map((c) => (
                 <option key={c} value={c}>
-                  {c}
+                  {c} (Indian Rupee - ₹)
                 </option>
               ))}
             </select>

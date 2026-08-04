@@ -1,9 +1,10 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 const CurrencyContext = createContext();
 
 export const CurrencyProvider = ({ children }) => {
-  const selectedCurrency = 'INR';
+  const [selectedCurrency, setSelectedCurrency] = useState('INR');
+  const availableCurrencies = ['INR'];
 
   const getSymbol = () => '₹';
 
@@ -21,6 +22,8 @@ export const CurrencyProvider = ({ children }) => {
   return (
     <CurrencyContext.Provider value={{
       selectedCurrency,
+      setSelectedCurrency,
+      availableCurrencies,
       formatAmount,
       getSymbol,
     }}>
