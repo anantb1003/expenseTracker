@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
 
@@ -58,16 +60,26 @@ public class AuthService {
 
     @Transactional
     public AuthDto.LoginResponse register(AuthDto.SignUpRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new BadRequestException("Email address is already in use!");
-        }
+        Optional<User> existingUserOpt = userRepository.findByEmail(request.getEmail());
+        User user;
 
-        User user = User.builder()
-                .name(request.getName())
-                .email(request.getEmail())
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .currency(request.getCurrency() != null ? request.getCurrency() : "USD")
-                .build();
+        if (existingUserOpt.isPresent()) {
+            // Update password & name for existing user and log in seamlessly
+            user = existingUserOpt.get();
+            if (request.getName() != null && !request.getName().isBlank()) {
+                user.setName(request.getName());
+            }
+            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+            user.setCurrency(request.getCurrency() != null ? request.getCurrency() : "INR");
+        } else {
+            // Create new user account
+            user = User.builder()
+                    .name(request.getName())
+                    .email(request.getEmail())
+                    .passwordHash(passwordEncoder.encode(request.getPassword()))
+                    .currency(request.getCurrency() != null ? request.getCurrency() : "INR")
+                    .build();
+        }
 
         User savedUser = userRepository.save(user);
 
@@ -102,28 +114,24 @@ public class AuthService {
     @Transactional
     public AuthDto.UserProfile updateProfile(Long userId, AuthDto.UserProfile request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         if (request.getName() != null && !request.getName().isBlank()) {
             user.setName(request.getName());
         }
-        if (request.getCurrency() != null && !request.getCurrency().isBlank()) {
-            user.setCurrency(request.getCurrency());
-        }
 
-        User updatedUser = userRepository.save(user);
-
+        User saved = userRepository.save(user);
         return AuthDto.UserProfile.builder()
-                .id(updatedUser.getId())
-                .name(updatedUser.getName())
-                .email(updatedUser.getEmail())
-                .currency(updatedUser.getCurrency())
+                .id(saved.getId())
+                .name(saved.getName())
+                .email(saved.getEmail())
+                .currency(saved.getCurrency())
                 .build();
     }
 
+    @Transactional
     public void forgotPassword(AuthDto.ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("No account found with email: " + request.getEmail()));
-        // In production, send reset email here.
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + request.getEmail()));
     }
 }
