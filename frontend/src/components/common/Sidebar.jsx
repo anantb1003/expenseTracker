@@ -9,7 +9,8 @@ import {
   BarChart3, 
   Settings,
   Wallet,
-  X
+  X,
+  Code
 } from 'lucide-react';
 
 const navItems = [
@@ -84,11 +85,19 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
           })}
         </nav>
 
-        {/* Bottom Banner */}
+        {/* Bottom Developer Credit Banner */}
         <div className="p-4 m-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 text-center">
-          <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400">
-            💡 Pro Tip: Set budget limits to prevent overspending!
-          </p>
+          <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1 mb-1">
+            <Code className="w-3 h-3 text-indigo-500 animate-pulse" />
+            Designed & Developed by
+          </div>
+          <a
+            href="mailto:anantb1003@gmail.com"
+            className="text-xs font-black text-indigo-600 dark:text-indigo-400 hover:underline block"
+          >
+            Anant Bawaskar
+          </a>
+          <span className="text-[9px] text-slate-400 font-mono">anantb1003@gmail.com</span>
         </div>
       </aside>
     </>
