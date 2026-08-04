@@ -18,20 +18,25 @@ const seedCategories = [
 ];
 
 const seedExpenses = [
-  { id: 101, title: 'Weekly Grocery Store', amount: 1450.00, categoryId: 1, categoryName: 'Groceries', expenseDate: new Date().toISOString().split('T')[0], paymentMethod: 'UPI', notes: 'D-Mart Supermarket' },
-  { id: 102, title: 'Dinner with Friends', amount: 850.00, categoryId: 2, categoryName: 'Dining & Food', expenseDate: new Date().toISOString().split('T')[0], paymentMethod: 'UPI', notes: 'Barbeque Nation' },
-  { id: 103, title: 'Electricity & Wi-Fi Bill', amount: 2100.00, categoryId: 4, categoryName: 'Bills & Utilities', expenseDate: new Date(Date.now() - 86400000 * 2).toISOString().split('T')[0], paymentMethod: 'UPI', notes: 'MSEB Monthly Power' },
-  { id: 104, title: 'Branded Shoes & Clothes', amount: 3200.00, categoryId: 3, categoryName: 'Shopping', expenseDate: new Date(Date.now() - 86400000 * 4).toISOString().split('T')[0], paymentMethod: 'Card', notes: 'Zudio Store' },
-  { id: 105, title: 'Petrol Refill', amount: 500.00, categoryId: 5, categoryName: 'Transportation', expenseDate: new Date(Date.now() - 86400000 * 5).toISOString().split('T')[0], paymentMethod: 'UPI', notes: 'HP Fuel Station' }
+  { id: 101, title: 'Weekly Grocery Store', amount: 1450.00, categoryId: 1, categoryName: 'Groceries', categoryColor: '#10B981', expenseDate: new Date().toISOString().split('T')[0], paymentMethod: 'UPI', notes: 'D-Mart Supermarket' },
+  { id: 102, title: 'Dinner with Friends', amount: 850.00, categoryId: 2, categoryName: 'Dining & Food', categoryColor: '#EF4444', expenseDate: new Date().toISOString().split('T')[0], paymentMethod: 'UPI', notes: 'Barbeque Nation' },
+  { id: 103, title: 'Electricity & Wi-Fi Bill', amount: 2100.00, categoryId: 4, categoryName: 'Bills & Utilities', categoryColor: '#3B82F6', expenseDate: new Date(Date.now() - 86400000 * 2).toISOString().split('T')[0], paymentMethod: 'UPI', notes: 'MSEB Monthly Power' },
+  { id: 104, title: 'Branded Shoes & Clothes', amount: 3200.00, categoryId: 3, categoryName: 'Shopping', categoryColor: '#8B5CF6', expenseDate: new Date(Date.now() - 86400000 * 4).toISOString().split('T')[0], paymentMethod: 'Card', notes: 'Zudio Store' },
+  { id: 105, title: 'Petrol Refill', amount: 500.00, categoryId: 5, categoryName: 'Transportation', categoryColor: '#F59E0B', expenseDate: new Date(Date.now() - 86400000 * 5).toISOString().split('T')[0], paymentMethod: 'UPI', notes: 'HP Fuel Station' }
 ];
 
 const getLocalStore = (key, fallback) => {
-  const data = localStorage.getItem(key);
-  if (!data) {
+  try {
+    const data = localStorage.getItem(key);
+    if (!data || data === 'undefined' || data === 'null') {
+      localStorage.setItem(key, JSON.stringify(fallback));
+      return fallback;
+    }
+    return JSON.parse(data);
+  } catch (e) {
     localStorage.setItem(key, JSON.stringify(fallback));
     return fallback;
   }
-  return JSON.parse(data);
 };
 
 // Request Interceptor: Attach JWT Token if logged in
@@ -46,24 +51,32 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Seamless Fallback Data for Standalone Client Mode
+// Response Interceptor: Intercept Netlify HTML responses and serve client data
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // If response data is HTML string (from Netlify SPA rewrite), reject so fallback runs
+    if (typeof response.data === 'string' && (response.data.trim().startsWith('<!') || response.data.trim().startsWith('<html'))) {
+      const error = new Error('Netlify SPA returned HTML instead of API JSON');
+      error.response = { status: 404 };
+      error.config = response.config;
+      return Promise.reject(error);
+    }
+    return response;
+  },
   (error) => {
     const { config, response } = error;
     
-    // If backend endpoint is unreachable or 404/500/401, intercept and serve client-side data
-    if (!response || response.status === 404 || response.status === 500 || response.status === 401 || error.code === 'ERR_NETWORK') {
+    // Fallback Engine for offline / Netlify SPA mode
+    if (!response || response.status === 404 || response.status === 500 || response.status === 401 || error.code === 'ERR_NETWORK' || typeof error.response?.data === 'string') {
       const url = config?.url || '';
       const method = (config?.method || 'get').toLowerCase();
 
-      console.warn(`[Client-Engine Fallback] ${method.toUpperCase()} ${url} - Serving persistent local store data.`);
+      console.warn(`[Client Fallback Engine] Handling ${method.toUpperCase()} ${url}`);
 
       // 0. Auth Check Endpoint
       if (url.includes('/auth/me') || url.includes('/users/profile')) {
-        const savedUser = localStorage.getItem('expense_user');
-        const userObj = savedUser ? JSON.parse(savedUser) : { id: 1, name: 'Anant Bawaskar', email: 'anantb1003@gmail.com', currency: 'INR' };
-        return Promise.resolve({ data: userObj });
+        const savedUser = getLocalStore('expense_user', { id: 1, name: 'Anant Bawaskar', email: 'anantb1003@gmail.com', currency: 'INR' });
+        return Promise.resolve({ data: savedUser });
       }
 
       // 1. Categories Endpoint
@@ -75,9 +88,9 @@ api.interceptors.response.use(
       // 2. Analytics Summary Endpoint
       if (url.includes('/analytics/summary')) {
         const expenses = getLocalStore('local_expenses', seedExpenses);
-        const spentToday = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+        const spentToday = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
         const summaryData = {
-          spentToday: spentToday > 0 ? 2300 : 0,
+          spentToday: 2300,
           spentThisWeek: 7600,
           spentThisMonth: 14200,
           topCategoryName: 'Groceries',
@@ -103,12 +116,12 @@ api.interceptors.response.use(
       // 4. Analytics Monthly Trend
       if (url.includes('/analytics/monthly-trend')) {
         const trend = [
-          { monthName: 'Mar', year: 2026, totalAmount: 11200 },
-          { monthName: 'Apr', year: 2026, totalAmount: 13500 },
-          { monthName: 'May', year: 2026, totalAmount: 12800 },
-          { monthName: 'Jun', year: 2026, totalAmount: 15400 },
-          { monthName: 'Jul', year: 2026, totalAmount: 14100 },
-          { monthName: 'Aug', year: 2026, totalAmount: 14200 }
+          { monthLabel: 'Mar', monthName: 'Mar', year: 2026, totalAmount: 11200 },
+          { monthLabel: 'Apr', monthName: 'Apr', year: 2026, totalAmount: 13500 },
+          { monthLabel: 'May', monthName: 'May', year: 2026, totalAmount: 12800 },
+          { monthLabel: 'Jun', monthName: 'Jun', year: 2026, totalAmount: 15400 },
+          { monthLabel: 'Jul', monthName: 'Jul', year: 2026, totalAmount: 14100 },
+          { monthLabel: 'Aug', monthName: 'Aug', year: 2026, totalAmount: 14200 }
         ];
         return Promise.resolve({ data: trend });
       }
@@ -128,7 +141,8 @@ api.interceptors.response.use(
           });
         }
         if (method === 'post') {
-          const body = JSON.parse(config.data || '{}');
+          let body = {};
+          try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
           const newExpense = { id: Date.now(), ...body };
           expenses.unshift(newExpense);
           localStorage.setItem('local_expenses', JSON.stringify(expenses));
@@ -139,9 +153,9 @@ api.interceptors.response.use(
       // 6. Budgets Endpoint
       if (url.includes('/budgets')) {
         const budgets = [
-          { id: 1, categoryId: 1, categoryName: 'Groceries', amountLimit: 6000, spentAmount: 4950, percentageUsed: 82.5 },
-          { id: 2, categoryId: 2, categoryName: 'Dining & Food', amountLimit: 3000, spentAmount: 1850, percentageUsed: 61.6 },
-          { id: 3, categoryId: 3, categoryName: 'Shopping', amountLimit: 5000, spentAmount: 3200, percentageUsed: 64.0 }
+          { id: 1, categoryId: 1, categoryName: 'Groceries', amountLimit: 6000, budgetAmount: 6000, spentAmount: 4950, percentageUsed: 82.5, remainingAmount: 1050 },
+          { id: 2, categoryId: 2, categoryName: 'Dining & Food', amountLimit: 3000, budgetAmount: 3000, spentAmount: 1850, percentageUsed: 61.6, remainingAmount: 1150 },
+          { id: 3, categoryId: 3, categoryName: 'Shopping', amountLimit: 5000, budgetAmount: 5000, spentAmount: 3200, percentageUsed: 64.0, remainingAmount: 1800 }
         ];
         return Promise.resolve({ data: budgets });
       }
