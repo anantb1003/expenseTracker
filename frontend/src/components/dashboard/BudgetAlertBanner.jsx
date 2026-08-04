@@ -6,12 +6,15 @@ const BudgetAlertBanner = ({ alerts = [] }) => {
   const { formatAmount } = useCurrency();
   const [dismissed, setDismissed] = React.useState(false);
 
-  if (dismissed || !alerts || alerts.length === 0) return null;
+  if (dismissed || !alerts || !Array.isArray(alerts) || alerts.length === 0) return null;
 
   return (
     <div className="space-y-3 mb-6">
       {alerts.map((alert, index) => {
+        if (!alert) return null;
         const isCritical = alert.alertStatus === 'CRITICAL_100';
+        const pct = typeof alert.percentageUsed === 'number' ? alert.percentageUsed.toFixed(1) : '0';
+
         return (
           <div
             key={index}
@@ -32,12 +35,12 @@ const BudgetAlertBanner = ({ alerts = [] }) => {
               <div>
                 <h4 className="font-bold text-sm">
                   {isCritical
-                    ? `⚠️ Over Budget Limit: ${alert.categoryName}`
-                    : `⚡ High Budget Alert: ${alert.categoryName}`}
+                    ? `⚠️ Over Budget Limit: ${alert.categoryName || 'Category'}`
+                    : `⚡ High Budget Alert: ${alert.categoryName || 'Category'}`}
                 </h4>
                 <p className="text-xs opacity-90 mt-0.5">
-                  Spent <span className="font-bold">{formatAmount(alert.spentAmount)}</span> of{' '}
-                  <span className="font-bold">{formatAmount(alert.budgetAmount)}</span> ({alert.percentageUsed.toFixed(1)}%)
+                  Spent <span className="font-bold">{formatAmount(alert.spentAmount || 0)}</span> of{' '}
+                  <span className="font-bold">{formatAmount(alert.budgetAmount || 0)}</span> ({pct}%)
                 </p>
               </div>
             </div>

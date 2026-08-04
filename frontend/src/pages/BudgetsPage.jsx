@@ -188,7 +188,7 @@ const BudgetsPage = () => {
                         : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400'
                     }`}
                   >
-                    {b.percentageUsed.toFixed(1)}%
+                    {(b.percentageUsed || 0).toFixed(1)}%
                   </span>
                 </div>
 
@@ -196,7 +196,7 @@ const BudgetsPage = () => {
                 <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
                   <div
                     className={`h-full ${progressColor} transition-all duration-500 rounded-full`}
-                    style={{ width: `${Math.min(100, b.percentageUsed)}%` }}
+                    style={{ width: `${Math.min(100, b.percentageUsed || 0)}%` }}
                   />
                 </div>
 
