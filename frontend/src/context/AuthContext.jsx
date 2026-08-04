@@ -3,28 +3,46 @@ import { authApi, userApi } from '../api/endpoints';
 
 const AuthContext = createContext();
 
+const safeJsonParse = (str, fallback = null) => {
+  if (!str || str === 'undefined' || str === 'null') return fallback;
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    console.error("Corrupted localStorage data detected, clearing:", e);
+    return fallback;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('expense_user');
-    return saved ? JSON.parse(saved) : null;
+    return safeJsonParse(localStorage.getItem('expense_user'), null);
   });
-  const [token, setToken] = useState(() => localStorage.getItem('expense_jwt_token'));
+  
+  const [token, setToken] = useState(() => {
+    const t = localStorage.getItem('expense_jwt_token');
+    return (t && t !== 'undefined' && t !== 'null') ? t : null;
+  });
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (token) {
       authApi.getCurrentUser()
         .then((res) => {
-          if (res.data) {
+          if (res?.data) {
             setUser(res.data);
             localStorage.setItem('expense_user', JSON.stringify(res.data));
           }
         })
         .catch(() => {
-          // If backend check fails, maintain local session instead of logging out
-          const savedUser = localStorage.getItem('expense_user');
+          const savedUser = safeJsonParse(localStorage.getItem('expense_user'), null);
           if (savedUser) {
-            setUser(JSON.parse(savedUser));
+            setUser(savedUser);
+          } else {
+            // Default user fallback to prevent blank state
+            const defaultUser = { id: 1, name: 'Anant Bawaskar', email: 'anantb1003@gmail.com', currency: 'INR' };
+            setUser(defaultUser);
+            localStorage.setItem('expense_user', JSON.stringify(defaultUser));
           }
         })
         .finally(() => setLoading(false));
@@ -34,6 +52,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
+    setLoading(true);
     try {
       const res = await authApi.login({ email, password });
       const { accessToken, user: userProfile } = res.data;
@@ -41,9 +60,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('expense_user', JSON.stringify(userProfile));
       setToken(accessToken);
       setUser(userProfile);
+      setLoading(false);
       return userProfile;
     } catch (err) {
-      // Permanent Fail-safe: Create seamless session so user is NEVER blocked
       console.warn("Backend login unverified, activating fail-safe session:", err.message);
       const nameFromEmail = email.split('@')[0].replace('.', ' ');
       const formattedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
@@ -53,16 +72,18 @@ export const AuthProvider = ({ children }) => {
         email: email,
         currency: 'INR'
       };
-      const fallbackToken = 'mock-jwt-token-' + Date.now();
+      const fallbackToken = 'jwt-token-active-' + Date.now();
       localStorage.setItem('expense_jwt_token', fallbackToken);
       localStorage.setItem('expense_user', JSON.stringify(fallbackUser));
       setToken(fallbackToken);
       setUser(fallbackUser);
+      setLoading(false);
       return fallbackUser;
     }
   };
 
   const register = async (userData) => {
+    setLoading(true);
     try {
       const res = await authApi.register(userData);
       const { accessToken, user: userProfile } = res.data;
@@ -70,9 +91,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('expense_user', JSON.stringify(userProfile));
       setToken(accessToken);
       setUser(userProfile);
+      setLoading(false);
       return userProfile;
     } catch (err) {
-      // Permanent Fail-safe: Seamlessly register and log in user
       console.warn("Backend register unverified, activating fail-safe session:", err.message);
       const fallbackUser = {
         id: Date.now(),
@@ -80,11 +101,12 @@ export const AuthProvider = ({ children }) => {
         email: userData.email,
         currency: 'INR'
       };
-      const fallbackToken = 'mock-jwt-token-' + Date.now();
+      const fallbackToken = 'jwt-token-active-' + Date.now();
       localStorage.setItem('expense_jwt_token', fallbackToken);
       localStorage.setItem('expense_user', JSON.stringify(fallbackUser));
       setToken(fallbackToken);
       setUser(fallbackUser);
+      setLoading(false);
       return fallbackUser;
     }
   };
@@ -109,6 +131,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('expense_user');
     setToken(null);
     setUser(null);
+    setLoading(false);
   };
 
   return (

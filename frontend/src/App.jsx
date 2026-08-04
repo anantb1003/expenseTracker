@@ -8,6 +8,7 @@ import Navbar from './components/common/Navbar';
 import Sidebar from './components/common/Sidebar';
 import MobileBottomNav from './components/common/MobileBottomNav';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 import DashboardPage from './pages/DashboardPage';
 import ExpensesPage from './pages/ExpensesPage';
@@ -55,19 +56,21 @@ const ProtectedLayout = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <CurrencyProvider>
-          <Router>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/*" element={<ProtectedLayout />} />
-            </Routes>
-          </Router>
-        </CurrencyProvider>
-      </ThemeProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ThemeProvider>
+          <CurrencyProvider>
+            <Router>
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/*" element={<ProtectedLayout />} />
+              </Routes>
+            </Router>
+          </CurrencyProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
