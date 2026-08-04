@@ -1,0 +1,3 @@
+com\expensetracker\service\ExpenseServiceTest.class
+com\expensetracker\service\BudgetServiceTest.class
+com\expensetracker\security\PasswordHashTest.class
