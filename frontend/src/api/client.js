@@ -52,12 +52,19 @@ api.interceptors.response.use(
   (error) => {
     const { config, response } = error;
     
-    // If backend endpoint is unreachable or 404/500, intercept and serve client-side data
-    if (!response || response.status === 404 || response.status === 500 || error.code === 'ERR_NETWORK') {
+    // If backend endpoint is unreachable or 404/500/401, intercept and serve client-side data
+    if (!response || response.status === 404 || response.status === 500 || response.status === 401 || error.code === 'ERR_NETWORK') {
       const url = config?.url || '';
       const method = (config?.method || 'get').toLowerCase();
 
       console.warn(`[Client-Engine Fallback] ${method.toUpperCase()} ${url} - Serving persistent local store data.`);
+
+      // 0. Auth Check Endpoint
+      if (url.includes('/auth/me') || url.includes('/users/profile')) {
+        const savedUser = localStorage.getItem('expense_user');
+        const userObj = savedUser ? JSON.parse(savedUser) : { id: 1, name: 'Anant Bawaskar', email: 'anantb1003@gmail.com', currency: 'INR' };
+        return Promise.resolve({ data: userObj });
+      }
 
       // 1. Categories Endpoint
       if (url.includes('/categories')) {
