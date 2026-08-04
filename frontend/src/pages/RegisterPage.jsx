@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wallet, User, Mail, Lock, DollarSign, ArrowRight } from 'lucide-react';
+import { Wallet, User, Mail, Lock, ArrowRight, Sparkles, Eye, EyeOff, ShieldCheck, Zap, TrendingUp } from 'lucide-react';
 import Button from '../components/common/Button';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [currency, setCurrency] = useState('USD');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -21,7 +21,7 @@ const RegisterPage = () => {
     setIsLoading(true);
 
     try {
-      await register({ name, email, password, currency });
+      await register({ name, email, password, currency: 'INR' });
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Email may already be in use.');
@@ -31,102 +31,126 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 relative overflow-hidden">
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/30 rounded-full blur-3xl" />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-600/30 rounded-full blur-3xl" />
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 relative overflow-hidden selection:bg-indigo-500 selection:text-white">
+      {/* Dynamic Animated Gradient Background Orbs */}
+      <div className="absolute -top-32 -right-32 w-96 h-96 bg-purple-600/25 rounded-full blur-[100px] animate-pulse-glow" />
+      <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-indigo-600/25 rounded-full blur-[100px] animate-pulse-glow" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[140px] pointer-events-none" />
 
-      <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-3xl p-8 shadow-2xl relative z-10">
+      {/* Grid Overlay Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+
+      {/* Register Card Container */}
+      <div className="w-full max-w-md bg-gradient-to-br from-slate-900/90 via-slate-900/95 to-slate-950/90 border border-slate-800/80 backdrop-blur-2xl rounded-3xl p-8 sm:p-10 shadow-[0_0_50px_-12px_rgba(168,85,247,0.25)] relative z-10 animate-scale-in">
+        
+        {/* Animated Brand Badge */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center mx-auto mb-4 shadow-xl shadow-indigo-500/30">
-            <Wallet className="w-8 h-8" />
+          <div className="relative inline-block mb-4">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 text-white flex items-center justify-center mx-auto shadow-xl shadow-purple-500/30 animate-float">
+              <Wallet className="w-8 h-8 text-white" />
+            </div>
+            <span className="absolute -top-1 -right-1 flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500" />
+            </span>
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-white">Create Account</h1>
-          <p className="text-xs text-slate-400 mt-1">Start tracking your daily expenses today</p>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-[11px] font-black text-purple-400 mb-2 uppercase tracking-widest">
+            <Sparkles className="w-3 h-3 text-purple-400 animate-pulse" />
+            Get Started Free
+          </div>
+
+          <h1 className="text-3xl font-black tracking-tight text-white mt-1">Create Account</h1>
+          <p className="text-xs text-slate-400 mt-1.5">Start tracking your daily expenses in Rupees today</p>
         </div>
 
+        {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-medium">
-            {error}
+          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-2 animate-slide-up">
+            <div className="w-2 h-2 rounded-full bg-rose-500 animate-ping flex-shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
-            <div className="relative">
-              <User className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              Full Name
+            </label>
+            <div className="relative group">
+              <User className="w-5 h-5 text-slate-500 group-focus-within:text-purple-400 absolute left-3.5 top-3.5 transition-colors" />
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm bg-slate-800/80 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Anant Bawaskar"
+                className="w-full pl-11 pr-4 py-3 rounded-2xl text-sm bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 transition-all duration-200"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              Email Address
+            </label>
+            <div className="relative group">
+              <Mail className="w-5 h-5 text-slate-500 group-focus-within:text-purple-400 absolute left-3.5 top-3.5 transition-colors" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm bg-slate-800/80 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-11 pr-4 py-3 rounded-2xl text-sm bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 transition-all duration-200"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              Password
+            </label>
+            <div className="relative group">
+              <Lock className="w-5 h-5 text-slate-500 group-focus-within:text-purple-400 absolute left-3.5 top-3.5 transition-colors" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 6 characters"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm bg-slate-800/80 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-11 pr-11 py-3 rounded-2xl text-sm bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 transition-all duration-200"
               />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Base Currency</label>
-            <div className="relative">
-              <DollarSign className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm bg-slate-800/80 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition"
               >
-                <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€)</option>
-                <option value="GBP">GBP (£)</option>
-                <option value="INR">INR (₹)</option>
-                <option value="CAD">CAD (CA$)</option>
-                <option value="AUD">AUD (A$)</option>
-              </select>
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
           </div>
 
-          <Button variant="primary" size="lg" type="submit" isLoading={isLoading} className="w-full mt-2">
-            Create Account <ArrowRight className="w-4 h-4 ml-2" />
+          <Button
+            variant="primary"
+            size="lg"
+            type="submit"
+            isLoading={isLoading}
+            className="w-full mt-3 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-sm tracking-wide shadow-lg shadow-purple-600/30 active:scale-95 transition-all duration-200"
+          >
+            Create Free Account <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </form>
 
-        <p className="text-center text-xs text-slate-400 mt-6">
+        {/* Login Redirect */}
+        <div className="text-center text-xs text-slate-400 mt-8 pt-6 border-t border-slate-800/80">
           Already have an account?{' '}
-          <Link to="/login" className="font-bold text-indigo-400 hover:underline">
-            Sign in
+          <Link to="/login" className="font-bold text-purple-400 hover:text-purple-300 transition underline underline-offset-4">
+            Sign In
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );
