@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wallet, User, Mail, Lock, ArrowRight, Sparkles, Eye, EyeOff, ShieldCheck, Zap, TrendingUp, Code } from 'lucide-react';
+import { Wallet, User, Mail, Lock, ArrowRight, Sparkles, Eye, EyeOff } from 'lucide-react';
 import Button from '../components/common/Button';
+import DeveloperFooter from '../components/common/DeveloperFooter';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -24,7 +25,7 @@ const RegisterPage = () => {
       await register({ name, email, password, currency: 'INR' });
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Email may already be in use.');
+      setError(err.response?.data?.message || 'Registration failed. An account with this email may already exist.');
     } finally {
       setIsLoading(false);
     }
@@ -68,9 +69,14 @@ const RegisterPage = () => {
 
           {/* Error Alert */}
           {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-2 animate-slide-up">
-              <div className="w-2 h-2 rounded-full bg-rose-500 animate-ping flex-shrink-0" />
-              <span>{error}</span>
+            <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center justify-between gap-2 animate-slide-up">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-rose-500 animate-ping flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+              <Link to="/login" className="px-2.5 py-1 rounded-lg bg-rose-500 text-white font-bold text-[11px] hover:bg-rose-600 transition flex-shrink-0">
+                Sign In
+              </Link>
             </div>
           )}
 
@@ -156,20 +162,7 @@ const RegisterPage = () => {
         </div>
       </div>
 
-      {/* Developer Credit Footer */}
-      <footer className="relative z-10 text-center pb-2">
-        <div className="text-xs font-medium text-slate-400 flex items-center justify-center gap-1.5">
-          <Code className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
-          <span>Designed & Developed by</span>
-          <a
-            href="mailto:anantb1003@gmail.com"
-            className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 hover:underline"
-          >
-            Anant Bawaskar
-          </a>
-          <span className="text-slate-500 font-mono text-[11px]">(anantb1003@gmail.com)</span>
-        </div>
-      </footer>
+      <DeveloperFooter />
     </div>
   );
 };

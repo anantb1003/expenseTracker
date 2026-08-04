@@ -15,8 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 public class AuthService {
 
@@ -60,26 +58,16 @@ public class AuthService {
 
     @Transactional
     public AuthDto.LoginResponse register(AuthDto.SignUpRequest request) {
-        Optional<User> existingUserOpt = userRepository.findByEmail(request.getEmail());
-        User user;
-
-        if (existingUserOpt.isPresent()) {
-            // Update password & name for existing user and log in seamlessly
-            user = existingUserOpt.get();
-            if (request.getName() != null && !request.getName().isBlank()) {
-                user.setName(request.getName());
-            }
-            user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-            user.setCurrency(request.getCurrency() != null ? request.getCurrency() : "INR");
-        } else {
-            // Create new user account
-            user = User.builder()
-                    .name(request.getName())
-                    .email(request.getEmail())
-                    .passwordHash(passwordEncoder.encode(request.getPassword()))
-                    .currency(request.getCurrency() != null ? request.getCurrency() : "INR")
-                    .build();
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException("An account with email (" + request.getEmail() + ") already exists. Please sign in or use a different email address.");
         }
+
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .currency(request.getCurrency() != null ? request.getCurrency() : "INR")
+                .build();
 
         User savedUser = userRepository.save(user);
 

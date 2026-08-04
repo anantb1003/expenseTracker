@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wallet, Mail, Lock, ArrowRight, Sparkles, Eye, EyeOff, ShieldCheck, Zap, TrendingUp, Code } from 'lucide-react';
+import { Wallet, Mail, Lock, ArrowRight, Sparkles, Eye, EyeOff, ShieldCheck, Zap, TrendingUp } from 'lucide-react';
 import Button from '../components/common/Button';
+import DeveloperFooter from '../components/common/DeveloperFooter';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -23,7 +24,7 @@ const LoginPage = () => {
       await login(email, password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password. If you restarted the server, please click "Create an account" to register.');
+      setError(err.response?.data?.message || 'Invalid email or password. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -139,9 +140,8 @@ const LoginPage = () => {
         </div>
       </div>
 
-      {/* Footer & Credits */}
-      <footer className="relative z-10 text-center space-y-3 pb-2">
-        {/* Features Row */}
+      {/* Feature Highlights & Developer Footer */}
+      <div className="w-full space-y-4">
         <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] font-bold text-slate-400 bg-slate-900/80 backdrop-blur-md px-6 py-2 rounded-full border border-slate-800 shadow-xl max-w-xl mx-auto">
           <span className="flex items-center gap-1.5 text-emerald-400">
             <Zap className="w-3.5 h-3.5" /> Instant UPI Logs
@@ -156,19 +156,8 @@ const LoginPage = () => {
           </span>
         </div>
 
-        {/* Developer Credit Footer */}
-        <div className="text-xs font-medium text-slate-400 flex items-center justify-center gap-1.5">
-          <Code className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-          <span>Designed & Developed by</span>
-          <a
-            href="mailto:anantb1003@gmail.com"
-            className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 hover:underline"
-          >
-            Anant Bawaskar
-          </a>
-          <span className="text-slate-500 font-mono text-[11px]">(anantb1003@gmail.com)</span>
-        </div>
-      </footer>
+        <DeveloperFooter />
+      </div>
     </div>
   );
 };

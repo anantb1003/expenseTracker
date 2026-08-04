@@ -10,7 +10,7 @@ import {
   Settings,
   Wallet,
   X,
-  Code
+  Code2
 } from 'lucide-react';
 
 const navItems = [
@@ -85,19 +85,21 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
           })}
         </nav>
 
-        {/* Bottom Developer Credit Banner */}
-        <div className="p-4 m-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 text-center">
-          <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1 mb-1">
-            <Code className="w-3 h-3 text-indigo-500 animate-pulse" />
+        {/* Ultra-Professional Developer Branding Card */}
+        <div className="p-4 m-4 rounded-2xl bg-gradient-to-br from-slate-900 to-indigo-950 border border-indigo-500/30 shadow-lg text-center relative overflow-hidden group">
+          <div className="text-[9px] uppercase tracking-widest font-black text-indigo-400 flex items-center justify-center gap-1 mb-1">
+            <Code2 className="w-3 h-3 text-indigo-400 animate-pulse" />
             Designed & Developed by
+          </div>
+          <div className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-purple-300">
+            Anant Bawaskar
           </div>
           <a
             href="mailto:anantb1003@gmail.com"
-            className="text-xs font-black text-indigo-600 dark:text-indigo-400 hover:underline block"
+            className="text-[10px] font-mono text-indigo-300 hover:text-white hover:underline block mt-0.5"
           >
-            Anant Bawaskar
+            anantb1003@gmail.com
           </a>
-          <span className="text-[9px] text-slate-400 font-mono">anantb1003@gmail.com</span>
         </div>
       </aside>
     </>
