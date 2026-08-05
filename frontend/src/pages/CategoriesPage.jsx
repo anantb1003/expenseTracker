@@ -7,7 +7,16 @@ import Toast from '../components/common/Toast';
 import { Tag, Plus, Edit2, Trash2, ShieldCheck } from 'lucide-react';
 
 const CategoriesPage = () => {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(() => {
+    try {
+      const saved = localStorage.getItem('local_categories');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  });
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -2,6 +2,52 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 
+const FALLBACK_CATEGORIES = [
+  { 
+    id: 1, name: 'Groceries', color: '#10B981',
+    subcategories: [{ id: 11, name: 'Supermarket' }, { id: 12, name: 'Fruits & Vegetables' }, { id: 13, name: 'Dairy & Bakery' }] 
+  },
+  { 
+    id: 2, name: 'Dining & Food', color: '#EF4444',
+    subcategories: [{ id: 21, name: 'Restaurants & Cafe' }, { id: 22, name: 'Online Food Delivery' }, { id: 23, name: 'Tea & Snacks' }] 
+  },
+  { 
+    id: 3, name: 'Shopping', color: '#8B5CF6',
+    subcategories: [{ id: 31, name: 'Clothing & Footwear' }, { id: 32, name: 'Electronics & Gadgets' }, { id: 33, name: 'Home Accessories' }] 
+  },
+  { 
+    id: 4, name: 'Bills & Utilities', color: '#3B82F6',
+    subcategories: [{ id: 41, name: 'Electricity & Gas' }, { id: 42, name: 'Mobile & Broadband' }, { id: 43, name: 'Water & Maintenance' }] 
+  },
+  { 
+    id: 5, name: 'Transportation', color: '#F59E0B',
+    subcategories: [{ id: 51, name: 'Fuel & Petrol' }, { id: 52, name: 'Cab & Uber/Ola' }, { id: 53, name: 'Public Transport & Fastag' }] 
+  },
+  { 
+    id: 6, name: 'Entertainment', color: '#EC4899',
+    subcategories: [{ id: 61, name: 'Movies & Concerts' }, { id: 62, name: 'OTT & Streaming' }] 
+  },
+  { 
+    id: 7, name: 'Health & Medical', color: '#06B6D4',
+    subcategories: [{ id: 71, name: 'Medicines & Pharmacy' }, { id: 72, name: 'Doctor & Diagnostics' }] 
+  },
+  { 
+    id: 8, name: 'Miscellaneous', color: '#64748B',
+    subcategories: [{ id: 81, name: 'General Expenses' }] 
+  }
+];
+
+const getCachedCategories = () => {
+  try {
+    const saved = localStorage.getItem('local_categories');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return FALLBACK_CATEGORIES;
+};
+
 const ExpenseFormModal = ({
   isOpen,
   onClose,
@@ -10,12 +56,17 @@ const ExpenseFormModal = ({
   categories = [],
   isLoading = false,
 }) => {
+  // Resolve active category list from props -> local cache -> fallback
+  const activeCategories = (categories && Array.isArray(categories) && categories.length > 0)
+    ? categories
+    : getCachedCategories();
+
   const [formData, setFormData] = useState({
     categoryId: '',
     subcategoryId: '',
     amount: '',
     expenseDate: new Date().toISOString().split('T')[0],
-    paymentMethod: 'CARD',
+    paymentMethod: 'UPI',
     notes: '',
     receiptUrl: '',
     isRecurring: false,
@@ -27,11 +78,11 @@ const ExpenseFormModal = ({
   useEffect(() => {
     if (initialData) {
       setFormData({
-        categoryId: initialData.categoryId || '',
-        subcategoryId: initialData.subcategoryId || '',
+        categoryId: initialData.categoryId ? String(initialData.categoryId) : (activeCategories[0]?.id ? String(activeCategories[0].id) : ''),
+        subcategoryId: initialData.subcategoryId ? String(initialData.subcategoryId) : '',
         amount: initialData.amount || '',
         expenseDate: initialData.expenseDate || new Date().toISOString().split('T')[0],
-        paymentMethod: initialData.paymentMethod || 'CARD',
+        paymentMethod: initialData.paymentMethod || 'UPI',
         notes: initialData.notes || '',
         receiptUrl: initialData.receiptUrl || '',
         isRecurring: initialData.isRecurring || false,
@@ -39,11 +90,11 @@ const ExpenseFormModal = ({
       });
     } else {
       setFormData({
-        categoryId: categories.length > 0 ? categories[0].id : '',
+        categoryId: activeCategories.length > 0 ? String(activeCategories[0].id) : '',
         subcategoryId: '',
         amount: '',
         expenseDate: new Date().toISOString().split('T')[0],
-        paymentMethod: 'CARD',
+        paymentMethod: 'UPI',
         notes: '',
         receiptUrl: '',
         isRecurring: false,
@@ -53,7 +104,7 @@ const ExpenseFormModal = ({
     setErrors({});
   }, [initialData, isOpen, categories]);
 
-  const selectedCategoryObj = categories.find((c) => c.id === Number(formData.categoryId));
+  const selectedCategoryObj = activeCategories.find((c) => String(c.id) === String(formData.categoryId));
 
   const validate = () => {
     const errs = {};
@@ -68,9 +119,13 @@ const ExpenseFormModal = ({
     e.preventDefault();
     if (!validate()) return;
 
+    const catObj = activeCategories.find((c) => String(c.id) === String(formData.categoryId));
+
     onSubmit({
       ...formData,
       categoryId: Number(formData.categoryId),
+      categoryName: catObj ? catObj.name : 'General',
+      categoryColor: catObj ? (catObj.color || '#4F46E5') : '#4F46E5',
       subcategoryId: formData.subcategoryId ? Number(formData.subcategoryId) : null,
       amount: Number(formData.amount),
     });
@@ -93,10 +148,10 @@ const ExpenseFormModal = ({
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value, subcategoryId: '' })}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             >
               <option value="">Select Category</option>
-              {categories.map((c) => (
+              {activeCategories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
@@ -113,7 +168,7 @@ const ExpenseFormModal = ({
               value={formData.subcategoryId}
               onChange={(e) => setFormData({ ...formData, subcategoryId: e.target.value })}
               disabled={!selectedCategoryObj || !selectedCategoryObj.subcategories?.length}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer"
             >
               <option value="">None / Select Subcategory</option>
               {selectedCategoryObj?.subcategories?.map((s) => (
@@ -129,16 +184,21 @@ const ExpenseFormModal = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Amount *
+              Amount (₹ INR) *
             </label>
-            <input
-              type="number"
-              step="0.01"
-              placeholder="0.00"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₹</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                required
+                placeholder="0.00"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                className="w-full pl-8 pr-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold"
+              />
+            </div>
             {errors.amount && <p className="text-rose-500 text-xs mt-1">{errors.amount}</p>}
           </div>
 
@@ -148,9 +208,10 @@ const ExpenseFormModal = ({
             </label>
             <input
               type="date"
+              required
               value={formData.expenseDate}
               onChange={(e) => setFormData({ ...formData, expenseDate: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             />
             {errors.expenseDate && <p className="text-rose-500 text-xs mt-1">{errors.expenseDate}</p>}
           </div>
@@ -164,30 +225,30 @@ const ExpenseFormModal = ({
           <select
             value={formData.paymentMethod}
             onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-            className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
           >
+            <option value="UPI">UPI / GPay / PhonePe / Paytm</option>
             <option value="CARD">Credit / Debit Card</option>
             <option value="CASH">Cash</option>
-            <option value="UPI">UPI</option>
-            <option value="WALLET">Digital Wallet</option>
-            <option value="BANK_TRANSFER">Bank Transfer</option>
+            <option value="NET_BANKING">Net Banking / NEFT</option>
           </select>
         </div>
 
-        {/* Notes & Receipt Image URL */}
+        {/* Notes / Description */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
             Notes / Description
           </label>
           <textarea
-            rows="2"
-            placeholder="e.g. Team dinner at Italian bistro"
+            rows={2}
+            placeholder="e.g. Team dinner at Italian bistro or D-Mart groceries"
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
+        {/* Optional Receipt URL */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
             Receipt Image URL (Optional)
@@ -202,44 +263,41 @@ const ExpenseFormModal = ({
         </div>
 
         {/* Recurring Toggle */}
-        <div className="flex items-center gap-2 pt-1">
-          <input
-            type="checkbox"
-            id="isRecurring"
-            checked={formData.isRecurring}
-            onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
-            className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer"
-          />
-          <label htmlFor="isRecurring" className="text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.isRecurring}
+              onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
+              className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+            />
             Mark as Recurring Expense
           </label>
+
+          {formData.isRecurring && (
+            <div className="mt-3 pl-6">
+              <label className="block text-xs font-medium text-slate-500 mb-1">Recurrence Frequency</label>
+              <select
+                value={formData.recurrenceRule}
+                onChange={(e) => setFormData({ ...formData, recurrenceRule: e.target.value })}
+                className="w-full px-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="DAILY">Daily</option>
+                <option value="WEEKLY">Weekly</option>
+                <option value="MONTHLY">Monthly</option>
+                <option value="YEARLY">Yearly</option>
+              </select>
+            </div>
+          )}
         </div>
 
-        {formData.isRecurring && (
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Recurrence Schedule
-            </label>
-            <select
-              value={formData.recurrenceRule}
-              onChange={(e) => setFormData({ ...formData, recurrenceRule: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="DAILY">Daily</option>
-              <option value="WEEKLY">Weekly</option>
-              <option value="MONTHLY">Monthly</option>
-              <option value="YEARLY">Yearly</option>
-            </select>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Button variant="outline" size="md" type="button" onClick={onClose}>
             Cancel
           </Button>
           <Button variant="primary" size="md" type="submit" isLoading={isLoading}>
-            {initialData ? 'Save Changes' : 'Create Expense'}
+            {initialData ? 'Update Expense' : 'Create Expense'}
           </Button>
         </div>
       </form>

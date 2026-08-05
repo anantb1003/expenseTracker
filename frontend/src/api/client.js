@@ -9,12 +9,38 @@ const api = axios.create({
 
 // Initial Seed Data for Standalone Client Mode
 const seedCategories = [
-  { id: 1, name: 'Groceries', color: '#10B981', budgetLimit: 5000 },
-  { id: 2, name: 'Dining & Food', color: '#EF4444', budgetLimit: 3000 },
-  { id: 3, name: 'Shopping', color: '#8B5CF6', budgetLimit: 6000 },
-  { id: 4, name: 'Bills & Utilities', color: '#3B82F6', budgetLimit: 4000 },
-  { id: 5, name: 'Transportation', color: '#F59E0B', budgetLimit: 2000 },
-  { id: 6, name: 'Entertainment', color: '#EC4899', budgetLimit: 2500 }
+  { 
+    id: 1, name: 'Groceries', color: '#10B981', budgetLimit: 5000,
+    subcategories: [{ id: 11, name: 'Supermarket' }, { id: 12, name: 'Fruits & Vegetables' }, { id: 13, name: 'Dairy & Bakery' }] 
+  },
+  { 
+    id: 2, name: 'Dining & Food', color: '#EF4444', budgetLimit: 3000,
+    subcategories: [{ id: 21, name: 'Restaurants & Cafe' }, { id: 22, name: 'Online Food Delivery' }, { id: 23, name: 'Tea & Snacks' }] 
+  },
+  { 
+    id: 3, name: 'Shopping', color: '#8B5CF6', budgetLimit: 6000,
+    subcategories: [{ id: 31, name: 'Clothing & Footwear' }, { id: 32, name: 'Electronics & Gadgets' }, { id: 33, name: 'Home Accessories' }] 
+  },
+  { 
+    id: 4, name: 'Bills & Utilities', color: '#3B82F6', budgetLimit: 4000,
+    subcategories: [{ id: 41, name: 'Electricity & Gas' }, { id: 42, name: 'Mobile & Broadband' }, { id: 43, name: 'Water & Maintenance' }] 
+  },
+  { 
+    id: 5, name: 'Transportation', color: '#F59E0B', budgetLimit: 2000,
+    subcategories: [{ id: 51, name: 'Fuel & Petrol' }, { id: 52, name: 'Cab & Uber/Ola' }, { id: 53, name: 'Public Transport & Fastag' }] 
+  },
+  { 
+    id: 6, name: 'Entertainment', color: '#EC4899', budgetLimit: 2500,
+    subcategories: [{ id: 61, name: 'Movies & Concerts' }, { id: 62, name: 'OTT & Streaming' }] 
+  },
+  { 
+    id: 7, name: 'Health & Medical', color: '#06B6D4', budgetLimit: 3500,
+    subcategories: [{ id: 71, name: 'Medicines & Pharmacy' }, { id: 72, name: 'Doctor & Diagnostics' }] 
+  },
+  { 
+    id: 8, name: 'Miscellaneous', color: '#64748B', budgetLimit: 2000,
+    subcategories: [{ id: 81, name: 'General Expenses' }] 
+  }
 ];
 
 const seedExpenses = [

@@ -34,7 +34,16 @@ const ExpensesPage = () => {
   const { formatAmount } = useCurrency();
 
   const [expenses, setExpenses] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(() => {
+    try {
+      const saved = localStorage.getItem('local_categories');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  });
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
