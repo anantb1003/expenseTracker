@@ -4,36 +4,67 @@ import Button from '../common/Button';
 
 const FALLBACK_CATEGORIES = [
   { 
-    id: 1, name: 'Groceries', color: '#10B981',
-    subcategories: [{ id: 11, name: 'Supermarket' }, { id: 12, name: 'Fruits & Vegetables' }, { id: 13, name: 'Dairy & Bakery' }] 
+    id: 1, name: '💪 Gym & Fitness Diet', color: '#F97316',
+    subcategories: [
+      { id: 10, name: '🏋️ Gym Membership & Trainer' },
+      { id: 11, name: '🥛 Whey Protein & Supplements' },
+      { id: 12, name: '🥗 Fitness Diet & Meal Prep' },
+      { id: 13, name: '👟 Workout Gear & Activewear' }
+    ] 
   },
   { 
-    id: 2, name: 'Dining & Food', color: '#EF4444',
-    subcategories: [{ id: 21, name: 'Restaurants & Cafe' }, { id: 22, name: 'Online Food Delivery' }, { id: 23, name: 'Tea & Snacks' }] 
+    id: 2, name: '🛒 Groceries & Supermarket', color: '#10B981',
+    subcategories: [
+      { id: 20, name: '🏪 Supermarket & D-Mart' },
+      { id: 21, name: '🍎 Fruits & Fresh Vegetables' },
+      { id: 22, name: '🥛 Dairy, Milk & Bakery' }
+    ] 
   },
   { 
-    id: 3, name: 'Shopping', color: '#8B5CF6',
-    subcategories: [{ id: 31, name: 'Clothing & Footwear' }, { id: 32, name: 'Electronics & Gadgets' }, { id: 33, name: 'Home Accessories' }] 
+    id: 3, name: '🍔 Dining & Restaurants', color: '#EF4444',
+    subcategories: [
+      { id: 30, name: '🍕 Restaurants & Fast Food' },
+      { id: 31, name: '🛵 Zomato & Swiggy Delivery' },
+      { id: 32, name: '☕ Coffee & Evening Tea' }
+    ] 
   },
   { 
-    id: 4, name: 'Bills & Utilities', color: '#3B82F6',
-    subcategories: [{ id: 41, name: 'Electricity & Gas' }, { id: 42, name: 'Mobile & Broadband' }, { id: 43, name: 'Water & Maintenance' }] 
+    id: 4, name: '🛍️ Shopping & Apparel', color: '#8B5CF6',
+    subcategories: [
+      { id: 40, name: '👕 Clothes, Shoes & Fashion' },
+      { id: 41, name: '📱 Electronics & Gadgets' },
+      { id: 42, name: '🏠 Home Accessories' }
+    ] 
   },
   { 
-    id: 5, name: 'Transportation', color: '#F59E0B',
-    subcategories: [{ id: 51, name: 'Fuel & Petrol' }, { id: 52, name: 'Cab & Uber/Ola' }, { id: 53, name: 'Public Transport & Fastag' }] 
+    id: 5, name: '💡 Bills & Utilities', color: '#3B82F6',
+    subcategories: [
+      { id: 50, name: '⚡ Electricity & Gas Bill' },
+      { id: 51, name: '📶 Mobile Recharge & Wi-Fi' },
+      { id: 52, name: '💧 Water & Society Maintenance' }
+    ] 
   },
   { 
-    id: 6, name: 'Entertainment', color: '#EC4899',
-    subcategories: [{ id: 61, name: 'Movies & Concerts' }, { id: 62, name: 'OTT & Streaming' }] 
+    id: 6, name: '⛽ Fuel & Transportation', color: '#F59E0B',
+    subcategories: [
+      { id: 60, name: '⛽ Petrol & Diesel Refill' },
+      { id: 61, name: '🚖 Uber / Ola & Cab' },
+      { id: 62, name: '🛣️ Toll, Fastag & Bus' }
+    ] 
   },
   { 
-    id: 7, name: 'Health & Medical', color: '#06B6D4',
-    subcategories: [{ id: 71, name: 'Medicines & Pharmacy' }, { id: 72, name: 'Doctor & Diagnostics' }] 
+    id: 7, name: '🎬 Entertainment & OTT', color: '#EC4899',
+    subcategories: [
+      { id: 70, name: '🎟️ Cinema & Movie Tickets' },
+      { id: 71, name: '🍿 Netflix, Prime & Spotify' }
+    ] 
   },
   { 
-    id: 8, name: 'Miscellaneous', color: '#64748B',
-    subcategories: [{ id: 81, name: 'General Expenses' }] 
+    id: 8, name: '🩺 Medical & Health', color: '#06B6D4',
+    subcategories: [
+      { id: 80, name: '💊 Medicines & Medical Store' },
+      { id: 81, name: '🩺 Doctor & Diagnostic Tests' }
+    ] 
   }
 ];
 

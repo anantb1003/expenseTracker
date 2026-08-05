@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, RefreshCw, Calendar, DollarSign } from 'lucide-react';
+import { Search, Filter, RefreshCw } from 'lucide-react';
 import Button from '../common/Button';
 
 const ExpenseFilterBar = ({
@@ -27,9 +27,12 @@ const ExpenseFilterBar = ({
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
           <input
             type="text"
-            placeholder="Search notes..."
-            value={filters.searchKeyword || ''}
-            onChange={(e) => onChange('searchKeyword', e.target.value)}
+            placeholder="Search notes, title, category..."
+            value={filters.search || filters.searchKeyword || ''}
+            onChange={(e) => {
+              onChange('search', e.target.value);
+              onChange('searchKeyword', e.target.value);
+            }}
             className="w-full pl-9 pr-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -78,11 +81,10 @@ const ExpenseFilterBar = ({
             className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
           >
             <option value="">All Payment Methods</option>
-            <option value="CARD">Card</option>
+            <option value="UPI">UPI / GPay / PhonePe</option>
+            <option value="CARD">Credit / Debit Card</option>
             <option value="CASH">Cash</option>
-            <option value="UPI">UPI</option>
-            <option value="WALLET">Wallet</option>
-            <option value="BANK_TRANSFER">Bank Transfer</option>
+            <option value="NET_BANKING">Net Banking</option>
           </select>
         </div>
       </div>
