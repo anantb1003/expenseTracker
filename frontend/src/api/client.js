@@ -109,7 +109,7 @@ const pushAuditLog = (actionType, expenseId, details) => {
   localStorage.setItem('local_expense_history', JSON.stringify(logs));
 };
 
-// Fallback Engine Handler
+// Fallback Engine Handler with Dynamic Metric Calculation
 const handleFallbackResponse = (config) => {
   const url = config?.url || '';
   const method = (config?.method || 'get').toLowerCase();
@@ -152,47 +152,114 @@ const handleFallbackResponse = (config) => {
     }
   }
 
-  // 2. Analytics Summary Endpoint
+  // 2. Analytics Summary Endpoint (Fully Dynamic!)
   if (url.includes('/analytics/summary')) {
     const expenses = getLocalStore('local_expenses', seedExpenses);
-    const todayStr = new Date().toISOString().split('T')[0];
-    const spentToday = expenses.filter(e => e.expenseDate === todayStr).reduce((sum, e) => sum + Number(e.amount || 0), 0);
-    const totalMonth = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
+    const spentToday = expenses
+      .filter(e => e.expenseDate === todayStr)
+      .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000).toISOString().split('T')[0];
+    const spentThisWeek = expenses
+      .filter(e => e.expenseDate >= sevenDaysAgo && e.expenseDate <= todayStr)
+      .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+    const currentYearMonth = todayStr.substring(0, 7);
+    const spentThisMonth = expenses
+      .filter(e => e.expenseDate && e.expenseDate.startsWith(currentYearMonth))
+      .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+    const categoryTotals = {};
+    expenses.forEach(e => {
+      const catName = e.categoryName || 'Other';
+      categoryTotals[catName] = (categoryTotals[catName] || 0) + Number(e.amount || 0);
+    });
+
+    let topCategoryName = 'None';
+    let topCategoryAmount = 0;
+    Object.entries(categoryTotals).forEach(([catName, amt]) => {
+      if (amt > topCategoryAmount) {
+        topCategoryAmount = amt;
+        topCategoryName = catName;
+      }
+    });
 
     const summaryData = {
-      spentToday: spentToday > 0 ? spentToday : 2300,
-      spentThisWeek: 7600,
-      spentThisMonth: totalMonth > 0 ? totalMonth : 14200,
-      topCategoryName: 'Groceries',
-      topCategoryAmount: 4950,
+      spentToday,
+      spentThisWeek,
+      spentThisMonth,
+      topCategoryName,
+      topCategoryAmount,
       budgetAlerts: []
     };
     return Promise.resolve({ data: summaryData, status: 200, headers: {}, config });
   }
 
-  // 3. Analytics Category Breakdown
+  // 3. Analytics Category Breakdown (Fully Dynamic!)
   if (url.includes('/analytics/category-breakdown')) {
-    const breakdown = [
-      { categoryName: 'Groceries', amount: 4950, percentage: 34.8, categoryColor: '#10B981' },
-      { categoryName: 'Shopping', amount: 3200, percentage: 22.5, categoryColor: '#8B5CF6' },
-      { categoryName: 'Bills & Utilities', amount: 2100, percentage: 14.7, categoryColor: '#3B82F6' },
-      { categoryName: 'Dining & Food', amount: 1850, percentage: 13.0, categoryColor: '#EF4444' },
-      { categoryName: 'Transportation', amount: 1200, percentage: 8.4, categoryColor: '#F59E0B' },
-      { categoryName: 'Entertainment', amount: 900, percentage: 6.6, categoryColor: '#EC4899' }
-    ];
+    const expenses = getLocalStore('local_expenses', seedExpenses);
+    if (!expenses || expenses.length === 0) {
+      return Promise.resolve({ data: [], status: 200, headers: {}, config });
+    }
+
+    const categories = getLocalStore('local_categories', seedCategories);
+    const categoryMap = {};
+    categories.forEach(c => {
+      categoryMap[c.name] = c.color || '#4F46E5';
+    });
+
+    const categoryTotals = {};
+    let totalSpent = 0;
+    expenses.forEach(e => {
+      const amt = Number(e.amount || 0);
+      const catName = e.categoryName || 'General';
+      categoryTotals[catName] = (categoryTotals[catName] || 0) + amt;
+      totalSpent += amt;
+    });
+
+    const breakdown = Object.entries(categoryTotals).map(([catName, amt]) => ({
+      categoryName: catName,
+      amount: amt,
+      percentage: totalSpent > 0 ? Number(((amt / totalSpent) * 100).toFixed(1)) : 0,
+      categoryColor: categoryMap[catName] || '#6366F1'
+    }));
+
     return Promise.resolve({ data: breakdown, status: 200, headers: {}, config });
   }
 
-  // 4. Analytics Monthly Trend
+  // 4. Analytics Monthly Trend (Fully Dynamic!)
   if (url.includes('/analytics/monthly-trend')) {
-    const trend = [
-      { monthLabel: 'Mar', monthName: 'Mar', year: 2026, totalAmount: 11200 },
-      { monthLabel: 'Apr', monthName: 'Apr', year: 2026, totalAmount: 13500 },
-      { monthLabel: 'May', monthName: 'May', year: 2026, totalAmount: 12800 },
-      { monthLabel: 'Jun', monthName: 'Jun', year: 2026, totalAmount: 15400 },
-      { monthLabel: 'Jul', monthName: 'Jul', year: 2026, totalAmount: 14100 },
-      { monthLabel: 'Aug', monthName: 'Aug', year: 2026, totalAmount: 14200 }
-    ];
+    const expenses = getLocalStore('local_expenses', seedExpenses);
+    if (!expenses || expenses.length === 0) {
+      return Promise.resolve({ data: [], status: 200, headers: {}, config });
+    }
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const trend = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yearMonthKey = `${yyyy}-${mm}`;
+      const monthLabel = monthNames[d.getMonth()];
+
+      const totalForMonth = expenses
+        .filter(e => e.expenseDate && e.expenseDate.startsWith(yearMonthKey))
+        .reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+      trend.push({
+        monthLabel,
+        monthName: monthLabel,
+        year: yyyy,
+        totalAmount: totalForMonth
+      });
+    }
+
     return Promise.resolve({ data: trend, status: 200, headers: {}, config });
   }
 
