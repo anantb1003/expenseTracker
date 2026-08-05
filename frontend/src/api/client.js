@@ -51,6 +51,37 @@ const seedExpenses = [
   { id: 105, title: 'Petrol Refill', amount: 500.00, categoryId: 5, categoryName: 'Transportation', categoryColor: '#F59E0B', expenseDate: new Date(Date.now() - 86400000 * 5).toISOString().split('T')[0], paymentMethod: 'UPI', notes: 'HP Fuel Station' }
 ];
 
+const seedHistoryLogs = [
+  {
+    id: 1,
+    actionType: 'CREATE',
+    expenseId: 101,
+    details: 'Logged ₹1,450.00 for Groceries (D-Mart Supermarket)',
+    timestamp: new Date().toISOString()
+  },
+  {
+    id: 2,
+    actionType: 'CREATE',
+    expenseId: 102,
+    details: 'Logged ₹850.00 for Dining & Food (Barbeque Nation)',
+    timestamp: new Date(Date.now() - 3600000 * 2).toISOString()
+  },
+  {
+    id: 3,
+    actionType: 'UPDATE',
+    expenseId: 103,
+    details: 'Updated ₹2,100.00 bill notes to MSEB Monthly Power',
+    timestamp: new Date(Date.now() - 86400000).toISOString()
+  },
+  {
+    id: 4,
+    actionType: 'CREATE',
+    expenseId: 104,
+    details: 'Logged ₹3,200.00 for Shopping (Zudio Store)',
+    timestamp: new Date(Date.now() - 86400000 * 3).toISOString()
+  }
+];
+
 const getLocalStore = (key, fallback) => {
   try {
     const data = localStorage.getItem(key);
@@ -65,12 +96,25 @@ const getLocalStore = (key, fallback) => {
   }
 };
 
+const pushAuditLog = (actionType, expenseId, details) => {
+  const logs = getLocalStore('local_expense_history', seedHistoryLogs);
+  const newLog = {
+    id: Date.now(),
+    actionType,
+    expenseId,
+    details,
+    timestamp: new Date().toISOString()
+  };
+  logs.unshift(newLog);
+  localStorage.setItem('local_expense_history', JSON.stringify(logs));
+};
+
 // Fallback Engine Handler
 const handleFallbackResponse = (config) => {
   const url = config?.url || '';
   const method = (config?.method || 'get').toLowerCase();
 
-  console.log(`[Client Engine Active] Serving persistent fallback data for ${method.toUpperCase()} ${url}`);
+  console.log(`[Client Engine Active] Handling ${method.toUpperCase()} ${url}`);
 
   // 0. Auth Check Endpoint
   if (url.includes('/auth/me') || url.includes('/users/profile')) {
@@ -81,7 +125,31 @@ const handleFallbackResponse = (config) => {
   // 1. Categories Endpoint
   if (url.includes('/categories')) {
     const categories = getLocalStore('local_categories', seedCategories);
-    return Promise.resolve({ data: categories, status: 200, headers: {}, config });
+    if (method === 'get') {
+      return Promise.resolve({ data: categories, status: 200, headers: {}, config });
+    }
+    if (method === 'post') {
+      let body = {};
+      try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
+      const newCat = { id: Date.now(), ...body };
+      categories.push(newCat);
+      localStorage.setItem('local_categories', JSON.stringify(categories));
+      return Promise.resolve({ data: newCat, status: 200, headers: {}, config });
+    }
+    if (method === 'put') {
+      let body = {};
+      try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
+      const idStr = url.split('/').pop();
+      const updatedList = categories.map(c => String(c.id) === idStr ? { ...c, ...body } : c);
+      localStorage.setItem('local_categories', JSON.stringify(updatedList));
+      return Promise.resolve({ data: body, status: 200, headers: {}, config });
+    }
+    if (method === 'delete') {
+      const idStr = url.split('/').pop();
+      const filtered = categories.filter(c => String(c.id) !== idStr);
+      localStorage.setItem('local_categories', JSON.stringify(filtered));
+      return Promise.resolve({ data: { message: 'Deleted successfully' }, status: 200, headers: {}, config });
+    }
   }
 
   // 2. Analytics Summary Endpoint
@@ -128,9 +196,46 @@ const handleFallbackResponse = (config) => {
     return Promise.resolve({ data: trend, status: 200, headers: {}, config });
   }
 
-  // 5. Expenses Endpoint
+  // 5. Activity History Endpoint MUST BE Intercepted BEFORE /expenses
+  if (url.includes('/expenses/history')) {
+    const historyLogs = getLocalStore('local_expense_history', seedHistoryLogs);
+    return Promise.resolve({
+      data: {
+        content: historyLogs,
+        totalPages: 1,
+        totalElements: historyLogs.length,
+        size: 15,
+        number: 0
+      },
+      status: 200,
+      headers: {},
+      config
+    });
+  }
+
+  // 6. Bulk Operations
+  if (url.includes('/expenses/bulk-delete')) {
+    let body = {};
+    try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
+    const idsToDelete = (body.ids || []).map(id => String(id));
+    const expenses = getLocalStore('local_expenses', seedExpenses);
+    const filtered = expenses.filter(e => !idsToDelete.includes(String(e.id)));
+    localStorage.setItem('local_expenses', JSON.stringify(filtered));
+    pushAuditLog('BULK_DELETE', null, `Bulk deleted ${idsToDelete.length} expense records`);
+    return Promise.resolve({ data: { message: `Deleted ${idsToDelete.length} expenses` }, status: 200, headers: {}, config });
+  }
+
+  if (url.includes('/expenses/bulk-recategorize')) {
+    let body = {};
+    try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
+    pushAuditLog('BULK_RECATEGORIZE', null, `Bulk recategorized ${(body.ids || []).length} expense records`);
+    return Promise.resolve({ data: { message: 'Recategorized successfully' }, status: 200, headers: {}, config });
+  }
+
+  // 7. General Expenses Endpoint
   if (url.includes('/expenses')) {
     const expenses = getLocalStore('local_expenses', seedExpenses);
+
     if (method === 'get') {
       return Promise.resolve({
         data: {
@@ -145,17 +250,37 @@ const handleFallbackResponse = (config) => {
         config
       });
     }
+
     if (method === 'post') {
       let body = {};
       try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
       const newExpense = { id: Date.now(), ...body };
       expenses.unshift(newExpense);
       localStorage.setItem('local_expenses', JSON.stringify(expenses));
+      pushAuditLog('CREATE', newExpense.id, `Logged ₹${Number(newExpense.amount).toLocaleString('en-IN')} for ${newExpense.categoryName || 'Expense'} (${newExpense.notes || 'Expense'})`);
       return Promise.resolve({ data: newExpense, status: 200, headers: {}, config });
+    }
+
+    if (method === 'put') {
+      let body = {};
+      try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
+      const idStr = url.split('/').pop();
+      const updatedExpenses = expenses.map(e => String(e.id) === idStr ? { ...e, ...body } : e);
+      localStorage.setItem('local_expenses', JSON.stringify(updatedExpenses));
+      pushAuditLog('UPDATE', Number(idStr), `Updated expense record #${idStr} (${body.notes || 'Expense'})`);
+      return Promise.resolve({ data: body, status: 200, headers: {}, config });
+    }
+
+    if (method === 'delete') {
+      const idStr = url.split('/').pop();
+      const filtered = expenses.filter(e => String(e.id) !== idStr);
+      localStorage.setItem('local_expenses', JSON.stringify(filtered));
+      pushAuditLog('DELETE', Number(idStr), `Deleted expense record #${idStr}`);
+      return Promise.resolve({ data: { message: 'Deleted successfully' }, status: 200, headers: {}, config });
     }
   }
 
-  // 6. Budgets Endpoint
+  // 8. Budgets Endpoint
   if (url.includes('/budgets')) {
     const budgets = [
       { id: 1, categoryId: 1, categoryName: 'Groceries', amountLimit: 6000, budgetAmount: 6000, spentAmount: 4950, percentageUsed: 82.5, remainingAmount: 1050 },
@@ -165,7 +290,7 @@ const handleFallbackResponse = (config) => {
     return Promise.resolve({ data: budgets, status: 200, headers: {}, config });
   }
 
-  // 7. Recurring Endpoint
+  // 9. Recurring Endpoint
   if (url.includes('/recurring')) {
     const recurring = [
       { id: 1, title: 'Netflix & Spotify Subscription', amount: 649.00, categoryName: 'Entertainment', frequency: 'MONTHLY', nextDueDate: new Date(Date.now() + 86400000 * 12).toISOString().split('T')[0], active: true },
