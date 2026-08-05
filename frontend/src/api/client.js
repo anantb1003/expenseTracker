@@ -10,7 +10,7 @@ const api = axios.create({
 // Initial Seed Data for Standalone Client Mode
 const seedCategories = [
   { 
-    id: 1, name: 'Groceries', color: '#10B981', budgetLimit: 5000,
+    id: 1, name: 'Groceries', color: '#10B981', budgetLimit: 6000,
     subcategories: [{ id: 11, name: 'Supermarket' }, { id: 12, name: 'Fruits & Vegetables' }, { id: 13, name: 'Dairy & Bakery' }] 
   },
   { 
@@ -18,7 +18,7 @@ const seedCategories = [
     subcategories: [{ id: 21, name: 'Restaurants & Cafe' }, { id: 22, name: 'Online Food Delivery' }, { id: 23, name: 'Tea & Snacks' }] 
   },
   { 
-    id: 3, name: 'Shopping', color: '#8B5CF6', budgetLimit: 6000,
+    id: 3, name: 'Shopping', color: '#8B5CF6', budgetLimit: 5000,
     subcategories: [{ id: 31, name: 'Clothing & Footwear' }, { id: 32, name: 'Electronics & Gadgets' }, { id: 33, name: 'Home Accessories' }] 
   },
   { 
@@ -82,6 +82,17 @@ const seedHistoryLogs = [
   }
 ];
 
+const seedBudgets = [
+  { id: 1, categoryId: 1, categoryName: 'Groceries', amountLimit: 6000, month: new Date().getMonth() + 1, year: new Date().getFullYear() },
+  { id: 2, categoryId: 2, categoryName: 'Dining & Food', amountLimit: 3000, month: new Date().getMonth() + 1, year: new Date().getFullYear() },
+  { id: 3, categoryId: 3, categoryName: 'Shopping', amountLimit: 5000, month: new Date().getMonth() + 1, year: new Date().getFullYear() }
+];
+
+const seedRecurring = [
+  { id: 1, title: 'Netflix & Spotify Subscription', amount: 649.00, categoryId: 6, categoryName: 'Entertainment', frequency: 'MONTHLY', nextDueDate: new Date(Date.now() + 86400000 * 12).toISOString().split('T')[0], paymentMethod: 'UPI', active: true },
+  { id: 2, title: 'Airtel Broadband Internet', amount: 999.00, categoryId: 4, categoryName: 'Bills & Utilities', frequency: 'MONTHLY', nextDueDate: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0], paymentMethod: 'UPI', active: true }
+];
+
 const getLocalStore = (key, fallback) => {
   try {
     const data = localStorage.getItem(key);
@@ -109,7 +120,7 @@ const pushAuditLog = (actionType, expenseId, details) => {
   localStorage.setItem('local_expense_history', JSON.stringify(logs));
 };
 
-// Fallback Engine Handler with Dynamic Metric Calculation
+// Fallback Engine Handler with Complete Dynamic Metric & CRUD Calculation
 const handleFallbackResponse = (config) => {
   const url = config?.url || '';
   const method = (config?.method || 'get').toLowerCase();
@@ -131,7 +142,7 @@ const handleFallbackResponse = (config) => {
     if (method === 'post') {
       let body = {};
       try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
-      const newCat = { id: Date.now(), ...body };
+      const newCat = { id: Date.now(), subcategories: [], ...body };
       categories.push(newCat);
       localStorage.setItem('local_categories', JSON.stringify(categories));
       return Promise.resolve({ data: newCat, status: 200, headers: {}, config });
@@ -152,7 +163,7 @@ const handleFallbackResponse = (config) => {
     }
   }
 
-  // 2. Analytics Summary Endpoint (Fully Dynamic!)
+  // 2. Analytics Summary Endpoint
   if (url.includes('/analytics/summary')) {
     const expenses = getLocalStore('local_expenses', seedExpenses);
     const now = new Date();
@@ -187,18 +198,38 @@ const handleFallbackResponse = (config) => {
       }
     });
 
+    // Check Budget Alerts
+    const rawBudgets = getLocalStore('local_budgets', seedBudgets);
+    const budgetAlerts = [];
+
+    rawBudgets.forEach(b => {
+      const catExpenses = expenses.filter(e => String(e.categoryId) === String(b.categoryId) && e.expenseDate && e.expenseDate.startsWith(currentYearMonth));
+      const spent = catExpenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+      const pct = b.amountLimit > 0 ? (spent / b.amountLimit) * 100 : 0;
+      if (pct >= 80) {
+        budgetAlerts.push({
+          categoryId: b.categoryId,
+          categoryName: b.categoryName || 'Category',
+          budgetAmount: b.amountLimit,
+          spentAmount: spent,
+          percentageUsed: pct,
+          exceeded: spent > b.amountLimit
+        });
+      }
+    });
+
     const summaryData = {
       spentToday,
       spentThisWeek,
       spentThisMonth,
       topCategoryName,
       topCategoryAmount,
-      budgetAlerts: []
+      budgetAlerts
     };
     return Promise.resolve({ data: summaryData, status: 200, headers: {}, config });
   }
 
-  // 3. Analytics Category Breakdown (Fully Dynamic!)
+  // 3. Analytics Category Breakdown
   if (url.includes('/analytics/category-breakdown')) {
     const expenses = getLocalStore('local_expenses', seedExpenses);
     if (!expenses || expenses.length === 0) {
@@ -230,7 +261,7 @@ const handleFallbackResponse = (config) => {
     return Promise.resolve({ data: breakdown, status: 200, headers: {}, config });
   }
 
-  // 4. Analytics Monthly Trend (Fully Dynamic!)
+  // 4. Analytics Monthly Trend
   if (url.includes('/analytics/monthly-trend')) {
     const expenses = getLocalStore('local_expenses', seedExpenses);
     if (!expenses || expenses.length === 0) {
@@ -263,7 +294,29 @@ const handleFallbackResponse = (config) => {
     return Promise.resolve({ data: trend, status: 200, headers: {}, config });
   }
 
-  // 5. Activity History Endpoint MUST BE Intercepted BEFORE /expenses
+  // 4.5. Analytics Daily Trend
+  if (url.includes('/analytics/daily-trend')) {
+    const expenses = getLocalStore('local_expenses', seedExpenses);
+    const dailyMap = {};
+    const now = new Date();
+    for (let i = 14; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * 86400000);
+      const dateStr = d.toISOString().split('T')[0];
+      const dayLabel = `${d.getDate()} ${d.toLocaleString('default', { month: 'short' })}`;
+      dailyMap[dateStr] = { date: dayLabel, dateStr, totalAmount: 0 };
+    }
+
+    expenses.forEach(e => {
+      if (e.expenseDate && dailyMap[e.expenseDate]) {
+        dailyMap[e.expenseDate].totalAmount += Number(e.amount || 0);
+      }
+    });
+
+    const dailyTrend = Object.values(dailyMap);
+    return Promise.resolve({ data: dailyTrend, status: 200, headers: {}, config });
+  }
+
+  // 5. Activity History Endpoint
   if (url.includes('/expenses/history')) {
     const historyLogs = getLocalStore('local_expense_history', seedHistoryLogs);
     return Promise.resolve({
@@ -347,23 +400,146 @@ const handleFallbackResponse = (config) => {
     }
   }
 
-  // 8. Budgets Endpoint
+  // 8. Budgets Endpoint (Dynamic Calculation & Persistence!)
   if (url.includes('/budgets')) {
-    const budgets = [
-      { id: 1, categoryId: 1, categoryName: 'Groceries', amountLimit: 6000, budgetAmount: 6000, spentAmount: 4950, percentageUsed: 82.5, remainingAmount: 1050 },
-      { id: 2, categoryId: 2, categoryName: 'Dining & Food', amountLimit: 3000, budgetAmount: 3000, spentAmount: 1850, percentageUsed: 61.6, remainingAmount: 1150 },
-      { id: 3, categoryId: 3, categoryName: 'Shopping', amountLimit: 5000, budgetAmount: 5000, spentAmount: 3200, percentageUsed: 64.0, remainingAmount: 1800 }
-    ];
-    return Promise.resolve({ data: budgets, status: 200, headers: {}, config });
+    const rawBudgets = getLocalStore('local_budgets', seedBudgets);
+    const expenses = getLocalStore('local_expenses', seedExpenses);
+    const categories = getLocalStore('local_categories', seedCategories);
+
+    if (method === 'get') {
+      const currentYearMonth = new Date().toISOString().substring(0, 7);
+
+      const calculatedBudgets = rawBudgets.map(b => {
+        const catObj = categories.find(c => String(c.id) === String(b.categoryId));
+        const catExpenses = expenses.filter(e => String(e.categoryId) === String(b.categoryId) && e.expenseDate && e.expenseDate.startsWith(currentYearMonth));
+        const spentAmount = catExpenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+        const limit = Number(b.amountLimit || b.budgetAmount || 5000);
+        const percentageUsed = limit > 0 ? (spentAmount / limit) * 100 : 0;
+        const remainingAmount = limit - spentAmount;
+
+        return {
+          id: b.id,
+          categoryId: b.categoryId,
+          categoryName: b.categoryName || catObj?.name || 'Category',
+          categoryColor: catObj?.color || '#4F46E5',
+          amountLimit: limit,
+          budgetAmount: limit,
+          spentAmount,
+          percentageUsed: Number(percentageUsed.toFixed(1)),
+          remainingAmount
+        };
+      });
+
+      return Promise.resolve({ data: calculatedBudgets, status: 200, headers: {}, config });
+    }
+
+    if (method === 'post' || method === 'put') {
+      let body = {};
+      try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
+      const catObj = categories.find(c => String(c.id) === String(body.categoryId));
+      const newBudget = {
+        id: Date.now(),
+        categoryId: body.categoryId,
+        categoryName: catObj?.name || 'Category',
+        amountLimit: Number(body.amount || 5000),
+        month: body.month || new Date().getMonth() + 1,
+        year: body.year || new Date().getFullYear()
+      };
+      rawBudgets.push(newBudget);
+      localStorage.setItem('local_budgets', JSON.stringify(rawBudgets));
+      return Promise.resolve({ data: newBudget, status: 200, headers: {}, config });
+    }
+
+    if (method === 'delete') {
+      const idStr = url.split('/').pop();
+      const filtered = rawBudgets.filter(b => String(b.id) !== idStr);
+      localStorage.setItem('local_budgets', JSON.stringify(filtered));
+      return Promise.resolve({ data: { message: 'Budget limit removed' }, status: 200, headers: {}, config });
+    }
   }
 
-  // 9. Recurring Endpoint
+  // 9. Recurring Endpoint (Full Schedule CRUD & Trigger Now!)
   if (url.includes('/recurring')) {
-    const recurring = [
-      { id: 1, title: 'Netflix & Spotify Subscription', amount: 649.00, categoryName: 'Entertainment', frequency: 'MONTHLY', nextDueDate: new Date(Date.now() + 86400000 * 12).toISOString().split('T')[0], active: true },
-      { id: 2, title: 'Airtel Broadband Internet', amount: 999.00, categoryName: 'Bills & Utilities', frequency: 'MONTHLY', nextDueDate: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0], active: true }
-    ];
-    return Promise.resolve({ data: recurring, status: 200, headers: {}, config });
+    const recurringList = getLocalStore('local_recurring', seedRecurring);
+
+    if (url.includes('/trigger')) {
+      // Trigger Now action
+      const parts = url.split('/');
+      const idStr = parts[parts.indexOf('recurring') + 1];
+      const targetRule = recurringList.find(r => String(r.id) === idStr);
+
+      if (targetRule) {
+        // Create an expense
+        const expenses = getLocalStore('local_expenses', seedExpenses);
+        const newExpense = {
+          id: Date.now(),
+          title: targetRule.title || 'Recurring Payment',
+          amount: targetRule.amount,
+          categoryId: targetRule.categoryId || 1,
+          categoryName: targetRule.categoryName || 'General',
+          categoryColor: '#4F46E5',
+          expenseDate: new Date().toISOString().split('T')[0],
+          paymentMethod: targetRule.paymentMethod || 'UPI',
+          notes: `Auto-triggered recurring payment: ${targetRule.title}`
+        };
+        expenses.unshift(newExpense);
+        localStorage.setItem('local_expenses', JSON.stringify(expenses));
+        pushAuditLog('CREATE', newExpense.id, `Triggered recurring ₹${Number(newExpense.amount).toLocaleString('en-IN')} payment: ${targetRule.title}`);
+
+        // Advance next due date by 1 month
+        const nextDate = new Date();
+        nextDate.setMonth(nextDate.getMonth() + 1);
+        targetRule.nextDueDate = nextDate.toISOString().split('T')[0];
+        localStorage.setItem('local_recurring', JSON.stringify(recurringList));
+      }
+      return Promise.resolve({ data: { message: 'Recurring transaction executed successfully' }, status: 200, headers: {}, config });
+    }
+
+    if (method === 'get') {
+      return Promise.resolve({ data: recurringList, status: 200, headers: {}, config });
+    }
+
+    if (method === 'post') {
+      let body = {};
+      try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
+      const categories = getLocalStore('local_categories', seedCategories);
+      const catObj = categories.find(c => String(c.id) === String(body.categoryId));
+
+      const newRule = {
+        id: Date.now(),
+        title: body.title || `${catObj?.name || 'Category'} Subscription`,
+        amount: Number(body.amount),
+        categoryId: body.categoryId,
+        categoryName: catObj?.name || 'General',
+        frequency: body.frequency || 'MONTHLY',
+        nextDueDate: body.nextDueDate || new Date().toISOString().split('T')[0],
+        paymentMethod: body.paymentMethod || 'UPI',
+        active: true
+      };
+      recurringList.push(newRule);
+      localStorage.setItem('local_recurring', JSON.stringify(recurringList));
+      return Promise.resolve({ data: newRule, status: 200, headers: {}, config });
+    }
+
+    if (method === 'delete') {
+      const idStr = url.split('/').pop();
+      const filtered = recurringList.filter(r => String(r.id) !== idStr);
+      localStorage.setItem('local_recurring', JSON.stringify(filtered));
+      return Promise.resolve({ data: { message: 'Schedule removed' }, status: 200, headers: {}, config });
+    }
+  }
+
+  // 10. Export Endpoints (Generate CSV / Excel / PDF Blobs!)
+  if (url.includes('/export/')) {
+    const expenses = getLocalStore('local_expenses', seedExpenses);
+
+    let csvContent = 'ID,Date,Title,Category,Amount,Payment Method,Notes\n';
+    expenses.forEach(e => {
+      csvContent += `${e.id},${e.expenseDate},"${e.title || 'Expense'}","${e.categoryName || ''}",${e.amount},${e.paymentMethod || 'UPI'},"${e.notes || ''}"\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    return Promise.resolve({ data: blob, status: 200, headers: {}, config });
   }
 
   return Promise.resolve({ data: {}, status: 200, headers: {}, config });
