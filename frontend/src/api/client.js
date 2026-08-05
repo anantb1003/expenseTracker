@@ -127,7 +127,63 @@ const handleFallbackResponse = (config) => {
 
   console.log(`[Client Engine Active] Handling ${method.toUpperCase()} ${url}`);
 
-  // 0. Auth Check Endpoint
+  // 0. Auth Endpoints
+  if (url.includes('/auth/login')) {
+    let body = {};
+    try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
+    const email = body.email || 'anantb1003@gmail.com';
+    const nameFromEmail = email.split('@')[0].replace('.', ' ');
+    const formattedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
+
+    const userProfile = {
+      id: Date.now(),
+      name: formattedName || 'Anant Bawaskar',
+      email: email,
+      currency: 'INR'
+    };
+    const accessToken = 'jwt-token-auth-' + Date.now();
+
+    localStorage.setItem('expense_jwt_token', accessToken);
+    localStorage.setItem('expense_user', JSON.stringify(userProfile));
+
+    return Promise.resolve({
+      data: {
+        accessToken,
+        tokenType: 'Bearer',
+        user: userProfile
+      },
+      status: 200,
+      headers: {},
+      config
+    });
+  }
+
+  if (url.includes('/auth/register')) {
+    let body = {};
+    try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
+    const userProfile = {
+      id: Date.now(),
+      name: body.name || 'Anant Bawaskar',
+      email: body.email || 'anantb1003@gmail.com',
+      currency: 'INR'
+    };
+    const accessToken = 'jwt-token-auth-' + Date.now();
+
+    localStorage.setItem('expense_jwt_token', accessToken);
+    localStorage.setItem('expense_user', JSON.stringify(userProfile));
+
+    return Promise.resolve({
+      data: {
+        accessToken,
+        tokenType: 'Bearer',
+        user: userProfile
+      },
+      status: 200,
+      headers: {},
+      config
+    });
+  }
+
   if (url.includes('/auth/me') || url.includes('/users/profile')) {
     const savedUser = getLocalStore('expense_user', { id: 1, name: 'Anant Bawaskar', email: 'anantb1003@gmail.com', currency: 'INR' });
     return Promise.resolve({ data: savedUser, status: 200, headers: {}, config });
