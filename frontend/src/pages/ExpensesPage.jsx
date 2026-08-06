@@ -287,7 +287,7 @@ const ExpensesPage = () => {
 
       {/* Bulk Operations Banner if items selected */}
       {selectedIds.length > 0 && (
-        <div className="glass-panel p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-l-4 border-indigo-500 animate-slide-up">
+        <div className="clay-panel p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-l-4 border-indigo-500 animate-slide-up">
           <div className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-indigo-500" />
             <span>{selectedIds.length} expense(s) selected</span>
@@ -335,7 +335,7 @@ const ExpensesPage = () => {
           onAction={handleOpenAdd}
         />
       ) : (
-        <div className="glass-panel overflow-hidden border border-slate-200/80 dark:border-slate-800/80 rounded-3xl shadow-xl">
+        <div className="clay-panel overflow-hidden border border-slate-200/80 dark:border-slate-800/80 rounded-3xl shadow-xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
               <thead className="bg-slate-100/80 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400 uppercase text-[10px] font-black tracking-wider border-b border-slate-200 dark:border-slate-800">

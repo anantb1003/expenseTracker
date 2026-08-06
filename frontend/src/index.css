@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white transition-colors duration-300;
+    @apply min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500 selection:text-white transition-colors duration-300;
   }
 }
 
@@ -45,17 +45,60 @@
   animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Glassmorphism & High-End Card Utilities */
-.glass-panel {
-  @apply bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl rounded-3xl transition-all duration-300;
+/* Claymorphism & High-End Card Utilities */
+.clay-panel {
+  @apply bg-[#f1f5f9] dark:bg-slate-800 rounded-[2rem] transition-all duration-300;
+  box-shadow: 
+    10px 10px 20px rgba(163, 177, 198, 0.4), 
+    -10px -10px 20px rgba(255, 255, 255, 1),
+    inset 2px 2px 5px rgba(163, 177, 198, 0.2),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.5);
 }
 
-.glass-card {
-  @apply bg-white/95 dark:bg-slate-900/90 backdrop-blur-lg border border-slate-200/70 dark:border-slate-800/70 shadow-lg hover:shadow-2xl hover:border-indigo-500/40 hover:-translate-y-1.5 transition-all duration-300 rounded-3xl;
+.dark .clay-panel {
+  box-shadow: 
+    8px 8px 16px rgba(0, 0, 0, 0.4), 
+    -8px -8px 16px rgba(255, 255, 255, 0.03),
+    inset 4px 4px 10px rgba(0, 0, 0, 0.5),
+    inset -4px -4px 10px rgba(255, 255, 255, 0.05);
 }
 
-.glass-card-interactive {
-  @apply glass-card cursor-pointer active:scale-95;
+.clay-card {
+  @apply bg-[#f1f5f9] dark:bg-slate-800 rounded-3xl transition-all duration-300;
+  box-shadow: 
+    6px 6px 12px rgba(163, 177, 198, 0.4), 
+    -6px -6px 12px rgba(255, 255, 255, 1),
+    inset 1px 1px 3px rgba(163, 177, 198, 0.2),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.5);
+}
+
+.dark .clay-card {
+  box-shadow: 
+    6px 6px 12px rgba(0, 0, 0, 0.4), 
+    -6px -6px 12px rgba(255, 255, 255, 0.03),
+    inset 2px 2px 5px rgba(0, 0, 0, 0.5),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.05);
+}
+
+.clay-card:hover {
+  box-shadow: 
+    8px 8px 16px rgba(163, 177, 198, 0.5), 
+    -8px -8px 16px rgba(255, 255, 255, 1),
+    inset 3px 3px 6px rgba(163, 177, 198, 0.3),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
+}
+
+.dark .clay-card:hover {
+  box-shadow: 
+    8px 8px 16px rgba(0, 0, 0, 0.5), 
+    -8px -8px 16px rgba(255, 255, 255, 0.05),
+    inset 3px 3px 8px rgba(0, 0, 0, 0.6),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.08);
+}
+
+.clay-card-interactive {
+  @apply clay-card cursor-pointer active:scale-95;
 }
 
 .glow-indigo {

@@ -9,7 +9,7 @@ const ExpenseFilterBar = ({
   categories = [],
 }) => {
   return (
-    <div className="glass-panel p-4 mb-6 space-y-4">
+    <div className="clay-panel p-4 mb-6 space-y-4">
       <div className="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
         <div className="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
           <Filter className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />

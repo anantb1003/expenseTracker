@@ -48,7 +48,7 @@ const SummaryCards = ({ summary }) => {
         return (
           <div
             key={idx}
-            className={`glass-card p-6 relative overflow-hidden group cursor-pointer border border-slate-200/80 dark:border-slate-800/80 transition-all duration-300 hover:-translate-y-2 ${card.glow}`}
+            className={`clay-card p-6 relative overflow-hidden group cursor-pointer border border-slate-200/80 dark:border-slate-800/80 transition-all duration-300 hover:-translate-y-2 ${card.glow}`}
           >
             <div className="flex items-center justify-between">
               <div>

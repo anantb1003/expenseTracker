@@ -82,7 +82,7 @@ const DashboardPage = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 clay-panel p-6">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
             Financial Dashboard
@@ -105,7 +105,7 @@ const DashboardPage = () => {
       {/* Analytics Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Category Breakdown Pie Chart */}
-        <div className="glass-panel p-6">
+        <div className="clay-panel p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
               Monthly Category Breakdown
@@ -116,7 +116,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Month-over-Month Spending Trend */}
-        <div className="glass-panel p-6">
+        <div className="clay-panel p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
               Month-over-Month Trend
@@ -128,7 +128,7 @@ const DashboardPage = () => {
       </div>
 
       {/* Recent Transactions Table Preview */}
-      <div className="glass-panel p-6">
+      <div className="clay-panel p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">

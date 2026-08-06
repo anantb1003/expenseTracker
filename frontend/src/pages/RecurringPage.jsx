@@ -99,7 +99,7 @@ const RecurringPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 clay-panel p-6">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
             Recurring Expense Schedules
@@ -116,7 +116,7 @@ const RecurringPage = () => {
 
       {/* Cards List */}
       {recurringList.length === 0 ? (
-        <div className="glass-panel p-8 text-center">
+        <div className="clay-panel p-8 text-center">
           <Repeat className="w-10 h-10 text-slate-400 mx-auto mb-2" />
           <h3 className="font-bold text-slate-800 dark:text-slate-200">No recurring costs scheduled</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
@@ -129,7 +129,7 @@ const RecurringPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {recurringList.map((item) => (
-            <div key={item.id} className="glass-card p-5 relative overflow-hidden flex flex-col justify-between">
+            <div key={item.id} className="clay-card p-5 relative overflow-hidden flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">

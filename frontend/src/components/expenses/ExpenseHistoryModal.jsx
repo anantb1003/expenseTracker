@@ -116,7 +116,7 @@ const ExpenseHistoryModal = ({ isOpen, onClose }) => {
                   </div>
 
                   {/* Log Content Card */}
-                  <div className="glass-panel p-4 border border-slate-200/70 dark:border-slate-800/80 rounded-2xl hover:border-indigo-500/40 transition-all">
+                  <div className="clay-panel p-4 border border-slate-200/70 dark:border-slate-800/80 rounded-2xl hover:border-indigo-500/40 transition-all">
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${badge.className}`}>
                         {badge.label}

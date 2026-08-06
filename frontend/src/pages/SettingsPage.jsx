@@ -37,7 +37,7 @@ const SettingsPage = () => {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="glass-panel p-6">
+      <div className="clay-panel p-6">
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
           Application Settings & Preferences
         </h1>
@@ -47,7 +47,7 @@ const SettingsPage = () => {
       </div>
 
       {/* Profile Settings Section */}
-      <div className="glass-panel p-6">
+      <div className="clay-panel p-6">
         <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
           <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
             <User className="w-5 h-5" />
@@ -108,7 +108,7 @@ const SettingsPage = () => {
       </div>
 
       {/* Visual Theme Section */}
-      <div className="glass-panel p-6">
+      <div className="clay-panel p-6">
         <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
           <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 flex items-center justify-center">
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -135,7 +135,7 @@ const SettingsPage = () => {
       </div>
 
       {/* Security Info Card */}
-      <div className="glass-panel p-6 flex items-center gap-4">
+      <div className="clay-panel p-6 flex items-center gap-4">
         <Shield className="w-8 h-8 text-emerald-500 shrink-0" />
         <div>
           <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">JWT Token Security Active</h4>

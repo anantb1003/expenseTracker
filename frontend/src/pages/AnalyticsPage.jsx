@@ -79,7 +79,7 @@ const AnalyticsPage = () => {
   return (
     <div className="space-y-6">
       {/* Header & Export Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 clay-panel p-6">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
             Analytics & Financial Reports
@@ -103,7 +103,7 @@ const AnalyticsPage = () => {
       </div>
 
       {/* Date Filter Bar */}
-      <div className="glass-panel p-4 flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
+      <div className="clay-panel p-4 flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-indigo-500" />
           <span>Custom Date Range:</span>
@@ -137,7 +137,7 @@ const AnalyticsPage = () => {
       </div>
 
       {/* Summary Highlight Banner */}
-      <div className="glass-panel p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="clay-panel p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Period Spend</span>
           <h2 className="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5">
@@ -151,7 +151,7 @@ const AnalyticsPage = () => {
       </div>
 
       {/* Daily Spend Trend Line Chart */}
-      <div className="glass-panel p-6">
+      <div className="clay-panel p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
@@ -165,14 +165,14 @@ const AnalyticsPage = () => {
 
       {/* Pie Chart & Bar Chart Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-panel p-6">
+        <div className="clay-panel p-6">
           <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">
             Category Share Breakdown
           </h3>
           <CategoryPieChart data={pieData} />
         </div>
 
-        <div className="glass-panel p-6">
+        <div className="clay-panel p-6">
           <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">
             12-Month Expenditure History
           </h3>
