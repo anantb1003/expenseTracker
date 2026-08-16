@@ -28,12 +28,21 @@ const ProtectedLayout = () => {
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="flex h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 relative">
+      {/* Background Ambient Glowing Orbs */}
+      <div className="glass-bg-orbs">
+        <div className="glass-orb w-[36rem] h-[36rem] bg-indigo-600/30 dark:bg-indigo-600/35 top-[-15%] left-[-10%] animate-float-slow" />
+        <div className="glass-orb w-[40rem] h-[40rem] bg-purple-600/25 dark:bg-purple-600/30 bottom-[-15%] right-[-10%] animate-pulse-glow" />
+        <div className="glass-orb w-96 h-96 bg-cyan-400/25 dark:bg-cyan-500/25 top-[35%] left-[25%] animate-float" />
+        <div className="glass-orb w-80 h-80 bg-rose-400/20 dark:bg-rose-500/20 top-[15%] right-[20%] animate-float-slow" />
+        <div className="glass-orb w-72 h-72 bg-amber-400/15 dark:bg-amber-500/15 bottom-[20%] left-[15%] animate-pulse" />
+      </div>
+
       {/* Sidebar */}
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         <Navbar onMobileMenuToggle={() => setMobileOpen(true)} />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8">
           <Routes>

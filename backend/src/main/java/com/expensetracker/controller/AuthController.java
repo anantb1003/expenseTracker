@@ -26,6 +26,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.register(request));
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<AuthDto.LoginResponse> googleLogin(@RequestBody AuthDto.GoogleLoginRequest request) {
+        return ResponseEntity.ok(authService.googleLogin(request));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<AuthDto.UserProfile> getCurrentUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(authService.getCurrentUserProfile(userPrincipal.getId()));

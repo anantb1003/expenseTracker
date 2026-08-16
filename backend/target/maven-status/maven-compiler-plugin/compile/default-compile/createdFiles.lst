@@ -32,6 +32,7 @@ com\expensetracker\dto\AnalyticsDto$DailySpendTrend$DailySpendTrendBuilder.class
 com\expensetracker\repository\RecurringExpenseRepository.class
 com\expensetracker\dto\AuditLogDto.class
 com\expensetracker\model\RecurringExpense.class
+com\expensetracker\dto\AuthDto$GoogleLoginRequest.class
 com\expensetracker\dto\CategoryDto$SubcategoryResponse.class
 com\expensetracker\dto\AuthDto$ForgotPasswordRequest.class
 com\expensetracker\service\CategoryService.class

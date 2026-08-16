@@ -66,6 +66,19 @@ public class AuthDto {
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class GoogleLoginRequest {
+        private String credential;
+        @Email(message = "Invalid email format")
+        private String email;
+        private String name;
+        private String googleId;
+        private String picture;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class UserProfile {
         private Long id;

@@ -99,12 +99,12 @@ const RecurringPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 clay-panel p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-6 border border-white/60 dark:border-white/10 shadow-xl">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 font-heading">
             Recurring Expense Schedules
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
             Automate monthly subscriptions, rent, utility bills, and memberships
           </p>
         </div>
@@ -116,10 +116,10 @@ const RecurringPage = () => {
 
       {/* Cards List */}
       {recurringList.length === 0 ? (
-        <div className="clay-panel p-8 text-center">
+        <div className="glass-panel p-8 text-center border border-white/60 dark:border-white/10 shadow-xl">
           <Repeat className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-          <h3 className="font-bold text-slate-800 dark:text-slate-200">No recurring costs scheduled</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
+          <h3 className="font-extrabold text-slate-800 dark:text-slate-200 font-heading">No recurring costs scheduled</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4 font-medium">
             Add rules for recurring monthly bills like Netflix, Internet, Rent, or Gym memberships.
           </p>
           <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
@@ -129,19 +129,19 @@ const RecurringPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {recurringList.map((item) => (
-            <div key={item.id} className="clay-card p-5 relative overflow-hidden flex flex-col justify-between">
+            <div key={item.id} className="glass-card p-5 relative overflow-hidden flex flex-col justify-between border border-white/60 dark:border-white/10 shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div
-                      className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-md"
+                      className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-md border border-white/20"
                       style={{ backgroundColor: item.categoryColor || '#10B981' }}
                     >
                       <Repeat className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">{item.categoryName}</h3>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400">
+                      <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 font-heading">{item.categoryName}</h3>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/15 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 backdrop-blur-md">
                         {item.frequency}
                       </span>
                     </div>
@@ -149,7 +149,7 @@ const RecurringPage = () => {
 
                   <button
                     onClick={() => handleDeleteRecurring(item.id)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition"
+                    className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 transition"
                     title="Delete Recurring Rule"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -157,19 +157,19 @@ const RecurringPage = () => {
                 </div>
 
                 <div className="mb-3">
-                  <span className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+                  <span className="text-2xl font-black text-slate-900 dark:text-slate-100 font-heading">
                     {formatAmount(item.amount, item.currency)}
                   </span>
-                  {item.notes && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{item.notes}</p>}
+                  {item.notes && <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">{item.notes}</p>}
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-                <div className="flex items-center text-slate-500">
+              <div className="pt-3 border-t border-white/30 dark:border-white/10 flex items-center justify-between text-xs">
+                <div className="flex items-center text-slate-500 font-medium">
                   <Clock className="w-3.5 h-3.5 mr-1" />
-                  <span>Next Due: <strong className="text-slate-800 dark:text-slate-200">{item.nextDueDate}</strong></span>
+                  <span>Next Due: <strong className="text-slate-800 dark:text-slate-200 font-bold">{item.nextDueDate}</strong></span>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => handleTriggerNow(item.id)} className="text-indigo-600 dark:text-indigo-400">
+                <Button variant="ghost" size="sm" onClick={() => handleTriggerNow(item.id)} className="text-indigo-600 dark:text-indigo-400 font-bold">
                   <Play className="w-3.5 h-3.5 mr-1" /> Log Entry Now
                 </Button>
               </div>

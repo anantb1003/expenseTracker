@@ -5,6 +5,8 @@ import { Wallet, Mail, Lock, ArrowRight, Sparkles, Eye, EyeOff, ShieldCheck, Zap
 import Button from '../components/common/Button';
 import DeveloperFooter from '../components/common/DeveloperFooter';
 
+import GoogleAuthButton from '../components/auth/GoogleAuthButton';
+
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,12 +45,12 @@ const LoginPage = () => {
       {/* Spacer for vertical centering */}
       <div className="w-full flex-1 flex items-center justify-center relative z-10 my-4">
         {/* Login Card Container */}
-        <div className="w-full max-w-md bg-gradient-to-br from-slate-900/90 via-slate-900/95 to-slate-950/90 border border-slate-800/80 backdrop-blur-2xl rounded-3xl p-8 sm:p-10 shadow-[0_0_50px_-12px_rgba(79,70,229,0.25)] animate-scale-in">
+        <div className="w-full max-w-md glass-container-dark p-8 sm:p-10 border border-white/20 animate-scale-in">
           
           {/* Animated Brand Badge */}
           <div className="text-center mb-8">
             <div className="relative inline-block mb-4">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white flex items-center justify-center mx-auto shadow-xl shadow-indigo-500/30 animate-float">
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white flex items-center justify-center mx-auto shadow-xl shadow-indigo-500/40 animate-float border border-white/30">
                 <Wallet className="w-8 h-8 text-white" />
               </div>
               <span className="absolute -top-1 -right-1 flex h-4 w-4">
@@ -57,62 +59,71 @@ const LoginPage = () => {
               </span>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[11px] font-black text-indigo-400 mb-2 uppercase tracking-widest">
-              <Sparkles className="w-3 h-3 text-indigo-400 animate-pulse" />
-              Smart Rupee Flow
-            </div>
-
-            <h1 className="text-3xl font-black tracking-tight text-white mt-1">Welcome Back</h1>
-            <p className="text-xs text-slate-400 mt-1.5">Sign in to manage your daily expenses & budgets</p>
+            <h1 className="text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-100 to-purple-200 font-heading">
+              Sign In to ExpenseFlow
+            </h1>
+            <p className="text-xs text-slate-300 font-semibold mt-1.5">Manage your daily expenses, budgets & analytics</p>
           </div>
 
           {/* Error Alert */}
           {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-2 animate-slide-up">
+            <div className="mb-6 p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs font-bold flex items-center gap-2 animate-slide-up backdrop-blur-md">
               <div className="w-2 h-2 rounded-full bg-rose-500 animate-ping flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
+          {/* Google Sign In Option */}
+          <div className="mb-6">
+            <GoogleAuthButton mode="signin" onSuccess={() => navigate('/')} onError={(err) => setError(err.message || 'Google Auth Failed')} />
+          </div>
+
+          <div className="relative flex items-center justify-center mb-6">
+            <div className="border-t border-slate-700/80 w-full" />
+            <span className="bg-slate-900 px-3 text-[11px] font-black text-slate-300 uppercase tracking-widest absolute rounded-full border border-slate-700">
+              Or Sign In with Email
+            </span>
+          </div>
+
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-black text-slate-200 uppercase tracking-wider mb-2">
                 Email Address
               </label>
               <div className="relative group">
-                <Mail className="w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 absolute left-3.5 top-3.5 transition-colors" />
+                <Mail className="w-5 h-5 text-slate-400 group-focus-within:text-indigo-400 absolute left-3.5 top-4 transition-colors z-10" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="anantba1003@gmail.com"
-                  className="w-full pl-11 pr-4 py-3 rounded-2xl text-sm bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 transition-all duration-200"
+                  placeholder="anantb1003@gmail.com"
+                  className="glass-input-dark pl-11 pr-4"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+                <label className="block text-xs font-black text-slate-200 uppercase tracking-wider">
                   Password
                 </label>
               </div>
               <div className="relative group">
-                <Lock className="w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 absolute left-3.5 top-3.5 transition-colors" />
+                <Lock className="w-5 h-5 text-slate-400 group-focus-within:text-indigo-400 absolute left-3.5 top-4 transition-colors z-10" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-11 pr-11 py-3 rounded-2xl text-sm bg-slate-950/80 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30 transition-all duration-200"
+                  className="glass-input-dark pl-11 pr-11"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition"
+                  className="absolute right-3.5 top-4 text-slate-400 hover:text-white transition z-10"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -124,16 +135,16 @@ const LoginPage = () => {
               size="lg"
               type="submit"
               isLoading={isLoading}
-              className="w-full mt-2 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-sm tracking-wide shadow-lg shadow-indigo-600/30 active:scale-95 transition-all duration-200"
+              className="w-full mt-2 py-3.5 rounded-2xl glass-btn-primary font-black text-sm tracking-wide shadow-xl shadow-indigo-600/40 active:scale-95 transition-all duration-200 border border-white/30"
             >
               Sign In to Dashboard <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </form>
 
           {/* Register Redirect */}
-          <div className="text-center text-xs text-slate-400 mt-8 pt-6 border-t border-slate-800/80">
+          <div className="text-center text-xs text-slate-300 font-semibold mt-8 pt-6 border-t border-slate-700/80">
             Don't have an account yet?{' '}
-            <Link to="/register" className="font-bold text-indigo-400 hover:text-indigo-300 transition underline underline-offset-4">
+            <Link to="/register" className="font-extrabold text-indigo-400 hover:text-indigo-300 transition underline underline-offset-4">
               Create an account
             </Link>
           </div>

@@ -179,7 +179,7 @@ const ExpenseFormModal = ({
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value, subcategoryId: '' })}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              className="w-full px-3 py-2 glass-input text-sm cursor-pointer"
             >
               <option value="">Select Category</option>
               {activeCategories.map((c) => (
@@ -199,14 +199,18 @@ const ExpenseFormModal = ({
               value={formData.subcategoryId}
               onChange={(e) => setFormData({ ...formData, subcategoryId: e.target.value })}
               disabled={!selectedCategoryObj || !selectedCategoryObj.subcategories?.length}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer"
+              className="w-full px-3 py-2 clay-input text-sm disabled:opacity-50 cursor-pointer"
             >
               <option value="">None / Select Subcategory</option>
-              {selectedCategoryObj?.subcategories?.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
+              {selectedCategoryObj?.subcategories?.map((s, idx) => {
+                const subId = typeof s === 'object' && s?.id !== undefined ? s.id : s;
+                const subName = typeof s === 'object' && s?.name !== undefined ? s.name : s;
+                return (
+                  <option key={subId || idx} value={subId}>
+                    {subName}
+                  </option>
+                );
+              })}
             </select>
           </div>
         </div>
@@ -227,7 +231,7 @@ const ExpenseFormModal = ({
                 placeholder="0.00"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className="w-full pl-8 pr-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold"
+                className="w-full pl-8 pr-3 py-2 clay-input text-sm font-semibold"
               />
             </div>
             {errors.amount && <p className="text-rose-500 text-xs mt-1">{errors.amount}</p>}
@@ -242,7 +246,7 @@ const ExpenseFormModal = ({
               required
               value={formData.expenseDate}
               onChange={(e) => setFormData({ ...formData, expenseDate: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              className="w-full px-3 py-2 glass-input text-sm cursor-pointer"
             />
             {errors.expenseDate && <p className="text-rose-500 text-xs mt-1">{errors.expenseDate}</p>}
           </div>
@@ -256,7 +260,7 @@ const ExpenseFormModal = ({
           <select
             value={formData.paymentMethod}
             onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-            className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="w-full px-3 py-2 clay-input text-sm cursor-pointer"
           >
             <option value="UPI">UPI / GPay / PhonePe / Paytm</option>
             <option value="CARD">Credit / Debit Card</option>
@@ -275,7 +279,7 @@ const ExpenseFormModal = ({
             placeholder="e.g. Team dinner at Italian bistro or D-Mart groceries"
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-3 py-2 clay-input text-sm"
           />
         </div>
 

@@ -36,21 +36,23 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
 
       {/* Sidebar Panel */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto flex flex-col ${
+        className={`fixed top-0 left-0 z-50 h-full w-64 glass-panel bg-white/75 dark:bg-slate-900/70 border-r border-white/50 dark:border-white/10 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto flex flex-col ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+        <div className="h-16 px-6 flex items-center justify-between border-b border-white/30 dark:border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 border border-white/30 animate-float">
               <Wallet className="w-6 h-6" />
             </div>
             <div>
-              <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-indigo-200 to-purple-300 dark:from-white dark:via-indigo-200 dark:to-purple-300 bg-clip-text text-transparent font-heading">
                 ExpenseFlow
               </span>
-              <div className="text-[10px] text-slate-500 font-medium tracking-wider">SMART TRACKER</div>
+              <div className="text-[9px] text-indigo-400 font-extrabold tracking-widest uppercase flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" /> NEXT-GEN GLASS
+              </div>
             </div>
           </div>
           <button
@@ -62,7 +64,7 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -71,27 +73,27 @@ const Sidebar = ({ mobileOpen, setMobileOpen }) => {
                 to={item.path}
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                  `flex items-center gap-3 px-4 py-3 rounded-2xl font-extrabold text-sm transition-all duration-300 relative ${
                     isActive
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
+                      ? 'glass-btn-primary text-white scale-[1.02] shadow-indigo-500/40 border border-white/40'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-transparent hover:border-white/30 dark:hover:border-white/10'
                   }`
                 }
               >
                 <Icon className="w-5 h-5" />
-                {item.name}
+                <span>{item.name}</span>
               </NavLink>
             );
           })}
         </nav>
 
         {/* Ultra-Professional Developer Branding Card */}
-        <div className="p-4 m-4 rounded-2xl bg-gradient-to-br from-slate-900 to-indigo-950 border border-indigo-500/30 shadow-lg text-center relative overflow-hidden group">
+        <div className="p-4 m-4 rounded-2xl glass-card bg-slate-900/90 dark:bg-slate-950/90 border border-indigo-500/40 shadow-2xl text-center relative overflow-hidden group">
           <div className="text-[9px] uppercase tracking-widest font-black text-indigo-400 flex items-center justify-center gap-1 mb-1">
-            <Code2 className="w-3 h-3 text-indigo-400 animate-pulse" />
+            <Code2 className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
             Designed & Developed by
           </div>
-          <div className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-purple-300">
+          <div className="text-sm font-black text-gradient-metallic font-heading">
             Anant Bawaskar
           </div>
           <a

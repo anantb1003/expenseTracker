@@ -109,18 +109,40 @@ const seedRecurring = [
   { id: 2, title: 'Airtel Broadband Wi-Fi', amount: 999.00, categoryId: 5, categoryName: '💡 Bills & Utilities', frequency: 'MONTHLY', nextDueDate: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0], paymentMethod: 'UPI', active: true }
 ];
 
-const getLocalStore = (key, fallback) => {
+const getUserEmail = () => {
   try {
-    const data = localStorage.getItem(key);
+    const userStr = localStorage.getItem('expense_user');
+    if (userStr) {
+      const userObj = JSON.parse(userStr);
+      if (userObj && userObj.email) return userObj.email.replace(/[^a-zA-Z0-9]/g, '_');
+    }
+  } catch(e) {}
+  return 'default';
+};
+
+const getScopedKey = (key) => {
+  if (key === 'expense_jwt_token' || key === 'expense_user') return key;
+  return `${key}_${getUserEmail()}`;
+};
+
+const getLocalStore = (key, fallback) => {
+  const scopedKey = getScopedKey(key);
+  try {
+    const data = localStorage.getItem(scopedKey);
     if (!data || data === 'undefined' || data === 'null') {
-      localStorage.setItem(key, JSON.stringify(fallback));
+      localStorage.setItem(scopedKey, JSON.stringify(fallback));
       return fallback;
     }
     return JSON.parse(data);
   } catch (e) {
-    localStorage.setItem(key, JSON.stringify(fallback));
+    localStorage.setItem(scopedKey, JSON.stringify(fallback));
     return fallback;
   }
+};
+
+const setLocalStore = (key, value) => {
+  const scopedKey = getScopedKey(key);
+  localStorage.setItem(scopedKey, JSON.stringify(value));
 };
 
 const pushAuditLog = (actionType, expenseId, details) => {
@@ -133,7 +155,7 @@ const pushAuditLog = (actionType, expenseId, details) => {
     timestamp: new Date().toISOString()
   };
   logs.unshift(newLog);
-  localStorage.setItem('local_expense_history', JSON.stringify(logs));
+  setLocalStore('local_expense_history', logs);
 };
 
 // Fallback Engine Handler with Complete Dynamic Metric, Search & Filtering
@@ -200,6 +222,36 @@ const handleFallbackResponse = (config) => {
     });
   }
 
+  if (url.includes('/auth/google')) {
+    let body = {};
+    try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
+    const email = body.email || 'google_user@gmail.com';
+    const name = body.name || email.split('@')[0];
+
+    const userProfile = {
+      id: Date.now(),
+      name: name,
+      email: email,
+      currency: 'INR',
+      picture: body.picture || null
+    };
+    const accessToken = 'jwt-token-google-' + Date.now();
+
+    localStorage.setItem('expense_jwt_token', accessToken);
+    localStorage.setItem('expense_user', JSON.stringify(userProfile));
+
+    return Promise.resolve({
+      data: {
+        accessToken,
+        tokenType: 'Bearer',
+        user: userProfile
+      },
+      status: 200,
+      headers: {},
+      config
+    });
+  }
+
   if (url.includes('/auth/me') || url.includes('/users/profile')) {
     const savedUser = getLocalStore('expense_user', { id: 1, name: 'Anant Bawaskar', email: 'anantb1003@gmail.com', currency: 'INR' });
     return Promise.resolve({ data: savedUser, status: 200, headers: {}, config });
@@ -214,7 +266,19 @@ const handleFallbackResponse = (config) => {
     if (method === 'post') {
       let body = {};
       try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
-      const newCat = { id: Date.now(), subcategories: [], ...body };
+      
+      const formattedSubcategories = Array.isArray(body.subcategories)
+        ? body.subcategories.map((sub, idx) => typeof sub === 'string' ? { id: Date.now() + idx, name: sub } : sub)
+        : [];
+
+      const newCat = { 
+        id: Date.now(), 
+        name: body.name,
+        color: body.color || '#4F46E5',
+        icon: body.icon || 'Tag',
+        isDefault: false,
+        subcategories: formattedSubcategories
+      };
       categories.push(newCat);
       localStorage.setItem('local_categories', JSON.stringify(categories));
       return Promise.resolve({ data: newCat, status: 200, headers: {}, config });
@@ -223,9 +287,24 @@ const handleFallbackResponse = (config) => {
       let body = {};
       try { body = typeof config.data === 'string' ? JSON.parse(config.data) : (config.data || {}); } catch(e) {}
       const idStr = url.split('/').pop();
-      const updatedList = categories.map(c => String(c.id) === idStr ? { ...c, ...body } : c);
+
+      const formattedSubcategories = Array.isArray(body.subcategories)
+        ? body.subcategories.map((sub, idx) => typeof sub === 'string' ? { id: Date.now() + idx, name: sub } : sub)
+        : undefined;
+
+      const updatedList = categories.map(c => {
+        if (String(c.id) === idStr) {
+          return { 
+            ...c, 
+            ...body, 
+            subcategories: formattedSubcategories !== undefined ? formattedSubcategories : c.subcategories 
+          };
+        }
+        return c;
+      });
       localStorage.setItem('local_categories', JSON.stringify(updatedList));
-      return Promise.resolve({ data: body, status: 200, headers: {}, config });
+      const updatedCat = updatedList.find(c => String(c.id) === idStr) || body;
+      return Promise.resolve({ data: updatedCat, status: 200, headers: {}, config });
     }
     if (method === 'delete') {
       const idStr = url.split('/').pop();
@@ -436,6 +515,9 @@ const handleFallbackResponse = (config) => {
       const endDate = params.endDate || '';
       const paymentMethod = params.paymentMethod || '';
 
+      const minAmt = params.minAmount ? Number(params.minAmount) : null;
+      const maxAmt = params.maxAmount ? Number(params.maxAmount) : null;
+
       if (searchKeyword) {
         expenses = expenses.filter(e => 
           (e.title && e.title.toLowerCase().includes(searchKeyword)) ||
@@ -459,6 +541,14 @@ const handleFallbackResponse = (config) => {
 
       if (paymentMethod) {
         expenses = expenses.filter(e => e.paymentMethod === paymentMethod);
+      }
+
+      if (minAmt !== null && !isNaN(minAmt)) {
+        expenses = expenses.filter(e => Number(e.amount || 0) >= minAmt);
+      }
+
+      if (maxAmt !== null && !isNaN(maxAmt)) {
+        expenses = expenses.filter(e => Number(e.amount || 0) <= maxAmt);
       }
 
       return Promise.resolve({
@@ -632,9 +722,35 @@ const handleFallbackResponse = (config) => {
 
   // 10. Export Endpoints
   if (url.includes('/export/')) {
-    const expenses = getLocalStore('local_expenses', seedExpenses);
+    let expenses = getLocalStore('local_expenses', seedExpenses);
+    const params = config?.params || {};
+    const startDate = params.startDate || '';
+    const endDate = params.endDate || '';
 
-    let csvContent = 'ID,Date,Title,Category,Amount,Payment Method,Notes\n';
+    if (startDate) {
+      expenses = expenses.filter(e => e.expenseDate && e.expenseDate >= startDate);
+    }
+    if (endDate) {
+      expenses = expenses.filter(e => e.expenseDate && e.expenseDate <= endDate);
+    }
+
+    if (url.includes('/export/pdf')) {
+      let pdfContent = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length 300 >>\nstream\nBT\n/F1 12 Tf\n50 750 Td\n(Daily Expense Management Summary Report) Tj\n0 -20 Td\n(Date Range: ${startDate || 'All'} to ${endDate || 'All'}) Tj\n0 -20 Td\n(Total Records Exported: ${expenses.length}) Tj\nET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f\n0000000009 00000 n\n0000000058 00000 n\n0000000115 00000 n\n0000000246 00000 n\n0000000580 00000 n\ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n650\n%%EOF`;
+      const blob = new Blob([pdfContent], { type: 'application/pdf' });
+      return Promise.resolve({ data: blob, status: 200, headers: {}, config });
+    }
+
+    if (url.includes('/export/excel')) {
+      let excelContent = '\uFEFFID\tDate\tTitle\tCategory\tAmount\tPayment Method\tNotes\n';
+      expenses.forEach(e => {
+        excelContent += `${e.id}\t${e.expenseDate}\t"${e.title || 'Expense'}"\t"${e.categoryName || ''}"\t${e.amount}\t${e.paymentMethod || 'UPI'}\t"${e.notes || ''}"\n`;
+      });
+      const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      return Promise.resolve({ data: blob, status: 200, headers: {}, config });
+    }
+
+    // Default CSV
+    let csvContent = '\uFEFFID,Date,Title,Category,Amount,Payment Method,Notes\n';
     expenses.forEach(e => {
       csvContent += `${e.id},${e.expenseDate},"${e.title || 'Expense'}","${e.categoryName || ''}",${e.amount},${e.paymentMethod || 'UPI'},"${e.notes || ''}"\n`;
     });

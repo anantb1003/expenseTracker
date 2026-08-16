@@ -58,16 +58,26 @@ const AnalyticsPage = () => {
         filename = 'expenses_summary_report.csv';
       }
 
-      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const mimeType = format === 'pdf' 
+        ? 'application/pdf' 
+        : format === 'excel' 
+        ? 'application/vnd.ms-excel' 
+        : 'text/csv;charset=utf-8;';
+
+      const blob = res.data instanceof Blob ? res.data : new Blob([res.data], { type: mimeType });
+
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
       setToast({ type: 'success', message: `${format.toUpperCase()} report generated successfully!` });
     } catch (err) {
+      console.error("Export error", err);
       setToast({ type: 'error', message: `Failed to export ${format.toUpperCase()}` });
     }
   };
@@ -79,12 +89,12 @@ const AnalyticsPage = () => {
   return (
     <div className="space-y-6">
       {/* Header & Export Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 clay-panel p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-6 border border-white/60 dark:border-white/10 shadow-xl">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 font-heading">
             Analytics & Financial Reports
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
             Deep-dive charts and downloadable PDF / Excel monthly & yearly reports
           </p>
         </div>
@@ -103,7 +113,7 @@ const AnalyticsPage = () => {
       </div>
 
       {/* Date Filter Bar */}
-      <div className="clay-panel p-4 flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
+      <div className="glass-panel p-4 flex flex-wrap items-center gap-4 text-xs font-bold text-slate-700 dark:text-slate-300 border border-white/60 dark:border-white/10 shadow-xl">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-indigo-500" />
           <span>Custom Date Range:</span>
@@ -114,7 +124,7 @@ const AnalyticsPage = () => {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-1.5 rounded-xl glass-input text-xs"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -123,7 +133,7 @@ const AnalyticsPage = () => {
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-3 py-1.5 rounded-xl glass-input text-xs"
           />
         </div>
         {(startDate || endDate) && (
@@ -137,27 +147,27 @@ const AnalyticsPage = () => {
       </div>
 
       {/* Summary Highlight Banner */}
-      <div className="clay-panel p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="glass-panel p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border border-white/60 dark:border-white/10 shadow-xl">
         <div>
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Period Spend</span>
-          <h2 className="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Period Spend</span>
+          <h2 className="text-3xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5 font-heading">
             {formatAmount(totalSpentInPeriod)}
           </h2>
         </div>
-        <div className="text-right text-xs text-slate-500">
+        <div className="text-right text-xs text-slate-500 font-medium">
           <span>Categories Analyzed: </span>
-          <strong className="text-slate-800 dark:text-slate-200">{pieData.length} categories</strong>
+          <strong className="text-slate-800 dark:text-slate-200 font-bold">{pieData.length} categories</strong>
         </div>
       </div>
 
       {/* Daily Spend Trend Line Chart */}
-      <div className="clay-panel p-6">
+      <div className="glass-panel p-6 border border-white/60 dark:border-white/10 shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 font-heading">
               Daily Spend Velocity
             </h3>
-            <p className="text-xs text-slate-500">Day-by-day expenditure fluctuation in current month</p>
+            <p className="text-xs font-medium text-slate-500">Day-by-day expenditure fluctuation in current month</p>
           </div>
         </div>
         <DailyLineChart data={lineData} />
@@ -165,15 +175,15 @@ const AnalyticsPage = () => {
 
       {/* Pie Chart & Bar Chart Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="clay-panel p-6">
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">
+        <div className="glass-panel p-6 border border-white/60 dark:border-white/10 shadow-xl">
+          <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 mb-4 font-heading">
             Category Share Breakdown
           </h3>
           <CategoryPieChart data={pieData} />
         </div>
 
-        <div className="clay-panel p-6">
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-4">
+        <div className="glass-panel p-6 border border-white/60 dark:border-white/10 shadow-xl">
+          <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100 mb-4 font-heading">
             12-Month Expenditure History
           </h3>
           <MonthlyBarChart data={barData} />

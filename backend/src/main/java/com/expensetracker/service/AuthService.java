@@ -87,6 +87,42 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
+    public AuthDto.LoginResponse googleLogin(AuthDto.GoogleLoginRequest request) {
+        String email = request.getEmail();
+        if (email == null || email.isBlank()) {
+            throw new BadRequestException("Email is required for Google login");
+        }
+
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            String name = request.getName() != null && !request.getName().isBlank() 
+                ? request.getName() 
+                : email.split("@")[0];
+            User newUser = User.builder()
+                .name(name)
+                .email(email)
+                .passwordHash(passwordEncoder.encode("GOOGLE_OAUTH_" + System.currentTimeMillis()))
+                .currency("INR")
+                .build();
+            return userRepository.save(newUser);
+        });
+
+        String token = tokenProvider.generateTokenFromUserId(user.getId(), user.getEmail());
+
+        AuthDto.UserProfile profile = AuthDto.UserProfile.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .currency(user.getCurrency())
+                .build();
+
+        return AuthDto.LoginResponse.builder()
+                .accessToken(token)
+                .tokenType("Bearer")
+                .user(profile)
+                .build();
+    }
+
     public AuthDto.UserProfile getCurrentUserProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));

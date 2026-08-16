@@ -12,7 +12,7 @@ const mobileNavItems = [
 
 const MobileBottomNav = () => {
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-2 py-2 flex items-center justify-around shadow-2xl">
+    <div className="lg:hidden fixed bottom-3 left-3 right-3 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/60 dark:border-white/10 px-1.5 sm:px-3 py-1.5 flex items-center justify-around shadow-2xl rounded-3xl">
       {mobileNavItems.map((item) => {
         const Icon = item.icon;
         return (
@@ -20,15 +20,15 @@ const MobileBottomNav = () => {
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center py-1 px-3 rounded-2xl text-[10px] font-bold transition-all duration-200 ${
+              `flex flex-col items-center justify-center py-1 px-2 sm:px-3 rounded-2xl text-[9px] sm:text-[10px] font-extrabold transition-all duration-200 ${
                 isActive
-                  ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 scale-105'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                  ? 'text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-md shadow-indigo-500/40 scale-105 border border-white/30'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`
             }
           >
-            <Icon className="w-5 h-5 mb-0.5" />
-            <span>{item.name}</span>
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5 mb-0.5" />
+            <span className="truncate max-w-[55px] sm:max-w-none">{item.name}</span>
           </NavLink>
         );
       })}

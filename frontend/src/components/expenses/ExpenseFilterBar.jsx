@@ -9,9 +9,9 @@ const ExpenseFilterBar = ({
   categories = [],
 }) => {
   return (
-    <div className="clay-panel p-4 mb-6 space-y-4">
-      <div className="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
-        <div className="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
+    <div className="glass-panel p-4 mb-6 space-y-4 border border-white/60 dark:border-white/10 shadow-xl">
+      <div className="flex items-center justify-between gap-2 border-b border-white/30 dark:border-white/10 pb-3">
+        <div className="flex items-center gap-2 text-sm font-extrabold text-slate-800 dark:text-slate-200 font-heading">
           <Filter className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
           Filter & Search Expenses
         </div>
@@ -31,9 +31,8 @@ const ExpenseFilterBar = ({
             value={filters.search || filters.searchKeyword || ''}
             onChange={(e) => {
               onChange('search', e.target.value);
-              onChange('searchKeyword', e.target.value);
             }}
-            className="w-full pl-9 pr-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-9 pr-3 py-2.5 glass-input text-xs"
           />
         </div>
 
@@ -42,7 +41,7 @@ const ExpenseFilterBar = ({
           <select
             value={filters.categoryId || ''}
             onChange={(e) => onChange('categoryId', e.target.value ? Number(e.target.value) : '')}
-            className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="w-full px-3 py-2.5 glass-input text-xs cursor-pointer"
           >
             <option value="">All Categories</option>
             {categories.map((c) => (
@@ -59,7 +58,7 @@ const ExpenseFilterBar = ({
             type="date"
             value={filters.startDate || ''}
             onChange={(e) => onChange('startDate', e.target.value)}
-            className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="w-full px-3 py-2.5 glass-input text-xs cursor-pointer"
           />
         </div>
 
@@ -69,7 +68,7 @@ const ExpenseFilterBar = ({
             type="date"
             value={filters.endDate || ''}
             onChange={(e) => onChange('endDate', e.target.value)}
-            className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="w-full px-3 py-2.5 glass-input text-xs cursor-pointer"
           />
         </div>
 
@@ -78,7 +77,7 @@ const ExpenseFilterBar = ({
           <select
             value={filters.paymentMethod || ''}
             onChange={(e) => onChange('paymentMethod', e.target.value)}
-            className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="w-full px-3 py-2.5 glass-input text-xs cursor-pointer"
           >
             <option value="">All Payment Methods</option>
             <option value="UPI">UPI / GPay / PhonePe</option>

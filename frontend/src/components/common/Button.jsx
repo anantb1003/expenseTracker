@@ -9,14 +9,14 @@ const Button = ({
   className = '',
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = 'inline-flex items-center justify-center font-bold rounded-xl transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 cursor-pointer backdrop-blur-md';
 
   const variants = {
-    primary: 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20 focus:ring-indigo-500',
-    secondary: 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 focus:ring-slate-400',
-    danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 focus:ring-rose-500',
-    outline: 'border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 focus:ring-indigo-500',
-    ghost: 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-slate-400',
+    primary: 'glass-btn-primary text-white shadow-indigo-500/30 hover:shadow-indigo-500/50 border border-white/30 font-black',
+    secondary: 'glass-btn-secondary font-bold',
+    danger: 'glass-btn-danger text-white shadow-rose-500/30 hover:shadow-rose-500/50 border border-white/30 font-black',
+    outline: 'glass-btn bg-transparent text-slate-800 dark:text-slate-100 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 border border-indigo-500/40 dark:border-indigo-400/40 font-bold',
+    ghost: 'text-slate-700 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 font-bold rounded-xl',
   };
 
   const sizes = {

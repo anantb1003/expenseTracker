@@ -3,6 +3,7 @@ import api from './client';
 export const authApi = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),
+  googleLogin: (googleData) => api.post('/auth/google', googleData),
   getCurrentUser: () => api.get('/auth/me'),
   getProfile: () => api.get('/auth/me'),
 };

@@ -119,8 +119,8 @@ const ExpensesPage = () => {
     fetchExpenses();
   }, [fetchExpenses]);
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
     setPage(0);
   };
 
@@ -222,20 +222,33 @@ const ExpensesPage = () => {
   const handleExport = async (type) => {
     try {
       let res;
-      let filename = `expenses_export.${type}`;
+      const fileExt = type === 'excel' ? 'xlsx' : type === 'pdf' ? 'pdf' : 'csv';
+      const filename = `expenses_export_${new Date().toISOString().split('T')[0]}.${fileExt}`;
+
       if (type === 'csv') res = await exportEndpoints.exportCsv(filters.startDate, filters.endDate);
-      else if (type === 'excel') { res = await exportEndpoints.exportExcel(filters.startDate, filters.endDate); filename = 'expenses_export.xlsx'; }
+      else if (type === 'excel') res = await exportEndpoints.exportExcel(filters.startDate, filters.endDate);
       else if (type === 'pdf') res = await exportEndpoints.exportPdf(filters.startDate, filters.endDate);
 
-      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const mimeType = type === 'pdf' 
+        ? 'application/pdf' 
+        : type === 'excel' 
+        ? 'application/vnd.ms-excel' 
+        : 'text/csv;charset=utf-8;';
+
+      const blob = res.data instanceof Blob ? res.data : new Blob([res.data], { type: mimeType });
+
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
-      link.remove();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
       setToast({ type: 'success', message: `Exported expenses as ${type.toUpperCase()}` });
     } catch (err) {
+      console.error("Export error", err);
       setToast({ type: 'error', message: `Failed to export as ${type.toUpperCase()}` });
     }
   };
@@ -244,9 +257,9 @@ const ExpensesPage = () => {
     <div className="space-y-6">
       {/* Page Header & Action Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Receipt className="w-8 h-8 text-indigo-500" />
+        <div className="w-full md:w-auto md:flex-1">
+          <h1 className="text-xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Receipt className="w-7 h-7 lg:w-8 lg:h-8 text-indigo-500 flex-shrink-0" />
             Expense Management
           </h1>
           <p className="text-xs lg:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -281,15 +294,15 @@ const ExpensesPage = () => {
       <ExpenseFilterBar
         filters={filters}
         categories={categories}
-        onFilterChange={handleFilterChange}
+        onChange={handleFilterChange}
         onReset={handleResetFilters}
       />
 
       {/* Bulk Operations Banner if items selected */}
       {selectedIds.length > 0 && (
-        <div className="clay-panel p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-l-4 border-indigo-500 animate-slide-up">
+        <div className="glass-panel p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-l-4 border-indigo-500 animate-slide-up shadow-xl">
           <div className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-indigo-500" />
+            <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
             <span>{selectedIds.length} expense(s) selected</span>
           </div>
           <div className="flex items-center gap-2">
@@ -304,19 +317,19 @@ const ExpensesPage = () => {
       )}
 
       {/* Export Bar */}
-      <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-900/60 p-3 rounded-2xl border border-slate-200/60 dark:border-slate-800/60">
-        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+      <div className="flex items-center justify-between bg-white/50 dark:bg-slate-900/50 backdrop-blur-md p-3 rounded-2xl border border-white/40 dark:border-white/10 shadow-sm">
+        <span className="text-xs font-extrabold text-slate-600 dark:text-slate-300">
           Showing {totalElements} total records
         </span>
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-bold text-slate-400 mr-1 hidden sm:inline">Export:</span>
-          <button onClick={() => handleExport('csv')} className="p-2 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition" title="Export CSV">
+          <span className="text-xs font-bold text-slate-400 mr-1 hidden sm:inline uppercase tracking-wider">Export:</span>
+          <button onClick={() => handleExport('csv')} className="p-2 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-300 border border-white/30 dark:border-white/10 transition" title="Export CSV">
             <FileCode className="w-4 h-4 text-emerald-500" />
           </button>
-          <button onClick={() => handleExport('excel')} className="p-2 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition" title="Export Excel">
+          <button onClick={() => handleExport('excel')} className="p-2 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-300 border border-white/30 dark:border-white/10 transition" title="Export Excel">
             <FileSpreadsheet className="w-4 h-4 text-green-600" />
           </button>
-          <button onClick={() => handleExport('pdf')} className="p-2 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition" title="Export PDF">
+          <button onClick={() => handleExport('pdf')} className="p-2 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-300 border border-white/30 dark:border-white/10 transition" title="Export PDF">
             <FileText className="w-4 h-4 text-rose-500" />
           </button>
         </div>
@@ -335,10 +348,10 @@ const ExpensesPage = () => {
           onAction={handleOpenAdd}
         />
       ) : (
-        <div className="clay-panel overflow-hidden border border-slate-200/80 dark:border-slate-800/80 rounded-3xl shadow-xl">
+        <div className="glass-panel overflow-hidden border border-white/60 dark:border-white/10 rounded-3xl shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-slate-100/80 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400 uppercase text-[10px] font-black tracking-wider border-b border-slate-200 dark:border-slate-800">
+            <table className="w-full text-left text-xs sm:text-sm min-w-[650px]">
+              <thead className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md text-slate-500 dark:text-slate-400 uppercase text-[10px] font-black tracking-wider border-b border-white/30 dark:border-white/10">
                 <tr>
                   <th className="py-3.5 px-4 w-10 text-center">
                     <button onClick={toggleSelectAll} className="text-slate-400 hover:text-indigo-500">
@@ -357,14 +370,14 @@ const ExpensesPage = () => {
                   <th className="py-3.5 px-4 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800/60">
+              <tbody className="divide-y divide-white/20 dark:divide-white/5">
                 {expenses.map((expense) => {
                   const isSelected = selectedIds.includes(expense.id);
                   return (
                     <tr
                       key={expense.id}
-                      className={`hover:bg-indigo-50/50 dark:hover:bg-slate-800/40 transition-colors ${
-                        isSelected ? 'bg-indigo-50/80 dark:bg-indigo-950/40' : ''
+                      className={`hover:bg-white/50 dark:hover:bg-slate-800/40 transition-colors ${
+                        isSelected ? 'bg-indigo-500/10 dark:bg-indigo-950/40' : ''
                       }`}
                     >
                       {/* Checkbox */}
@@ -375,7 +388,7 @@ const ExpensesPage = () => {
                       </td>
 
                       {/* Date */}
-                      <td className="py-3 px-4 font-mono text-xs text-slate-600 dark:text-slate-300">
+                      <td className="py-3 px-4 font-mono text-xs text-slate-600 dark:text-slate-300 font-medium">
                         {expense.expenseDate}
                       </td>
 
@@ -383,14 +396,14 @@ const ExpensesPage = () => {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
                           <span
-                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm"
                             style={{ backgroundColor: expense.categoryColor || '#4F46E5' }}
                           />
                           <span className="font-bold text-slate-800 dark:text-slate-200">
                             {expense.categoryName}
                           </span>
                           {expense.subcategoryName && (
-                            <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full">
+                            <span className="text-[10px] bg-white/60 dark:bg-slate-800/60 text-slate-500 px-2 py-0.5 rounded-full border border-white/30 dark:border-white/10 font-semibold">
                               {expense.subcategoryName}
                             </span>
                           )}
@@ -404,13 +417,13 @@ const ExpensesPage = () => {
 
                       {/* Payment Method */}
                       <td className="py-3 px-4">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/60 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border border-white/30 dark:border-white/10 backdrop-blur-md">
                           {expense.paymentMethod}
                         </span>
                       </td>
 
                       {/* Amount in Rupees */}
-                      <td className="py-3 px-4 text-right font-black text-slate-900 dark:text-slate-100">
+                      <td className="py-3 px-4 text-right font-extrabold text-slate-900 dark:text-slate-100 font-heading">
                         {formatAmount(expense.amount)}
                       </td>
 
@@ -419,14 +432,14 @@ const ExpensesPage = () => {
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => handleOpenEdit(expense)}
-                            className="p-1.5 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition"
+                            className="p-1.5 rounded-xl hover:bg-white/60 dark:hover:bg-slate-800/60 text-slate-600 dark:text-slate-300 transition"
                             title="Edit Expense"
                           >
                             <Edit className="w-4 h-4 text-indigo-500" />
                           </button>
                           <button
                             onClick={() => setDeleteConfirmId(expense.id)}
-                            className="p-1.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 transition"
+                            className="p-1.5 rounded-xl hover:bg-rose-500/10 text-rose-500 transition"
                             title="Delete Expense"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -442,21 +455,21 @@ const ExpensesPage = () => {
 
           {/* Pagination Footer */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="flex items-center justify-between p-4 border-t border-white/30 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md">
               <button
                 disabled={page === 0}
                 onClick={() => setPage(page - 1)}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-40 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 transition"
+                className="px-4 py-2 rounded-xl text-xs font-bold glass-card text-slate-700 dark:text-slate-300 disabled:opacity-40 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
               >
                 Previous
               </button>
-              <span className="text-xs font-medium text-slate-500">
+              <span className="text-xs font-bold text-slate-500">
                 Page {page + 1} of {totalPages}
               </span>
               <button
                 disabled={page >= totalPages - 1}
                 onClick={() => setPage(page + 1)}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-40 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 transition"
+                className="px-4 py-2 rounded-xl text-xs font-bold glass-card text-slate-700 dark:text-slate-300 disabled:opacity-40 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
               >
                 Next
               </button>

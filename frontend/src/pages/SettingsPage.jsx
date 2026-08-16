@@ -37,42 +37,42 @@ const SettingsPage = () => {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="clay-panel p-6">
-        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+      <div className="glass-panel p-6 border border-white/60 dark:border-white/10 shadow-xl">
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 font-heading">
           Application Settings & Preferences
         </h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
           Customize currency display, user profile details, and UI theme
         </p>
       </div>
 
       {/* Profile Settings Section */}
-      <div className="clay-panel p-6">
-        <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
-          <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+      <div className="glass-panel p-6 border border-white/60 dark:border-white/10 shadow-xl">
+        <div className="flex items-center gap-3 border-b border-white/30 dark:border-white/10 pb-4 mb-6">
+          <div className="w-9 h-9 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center backdrop-blur-md border border-indigo-500/30">
             <User className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">User Profile</h3>
-            <p className="text-xs text-slate-500">Update account credentials and base currency</p>
+            <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 font-heading">User Profile</h3>
+            <p className="text-xs font-medium text-slate-500">Update account credentials and base currency</p>
           </div>
         </div>
 
         <form onSubmit={handleSaveProfile} className="space-y-4 max-w-lg">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Email Address (Account Identifier)
             </label>
             <input
               type="email"
               disabled
               value={user?.email || ''}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 cursor-not-allowed"
+              className="w-full px-3.5 py-2.5 rounded-xl text-sm bg-white/40 dark:bg-slate-800/40 border border-white/30 dark:border-white/10 text-slate-500 cursor-not-allowed font-mono"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Full Name *
             </label>
             <input
@@ -80,21 +80,21 @@ const SettingsPage = () => {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-3.5 py-2.5 rounded-xl text-sm glass-input font-medium"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Display Currency
             </label>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              className="w-full px-3.5 py-2.5 rounded-xl text-sm glass-input font-bold cursor-pointer"
             >
               {currenciesList.map((c) => (
-                <option key={c} value={c}>
+                <option key={c} value={c} className="dark:bg-slate-900">
                   {c} (Indian Rupee - ₹)
                 </option>
               ))}
@@ -108,23 +108,23 @@ const SettingsPage = () => {
       </div>
 
       {/* Visual Theme Section */}
-      <div className="clay-panel p-6">
-        <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
-          <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+      <div className="glass-panel p-6 border border-white/60 dark:border-white/10 shadow-xl">
+        <div className="flex items-center gap-3 border-b border-white/30 dark:border-white/10 pb-4 mb-6">
+          <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center backdrop-blur-md border border-amber-500/30">
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </div>
           <div>
-            <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">Appearance & Theme</h3>
-            <p className="text-xs text-slate-500">Switch between sleek Dark Mode and clean Light Mode</p>
+            <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 font-heading">Appearance & Theme</h3>
+            <p className="text-xs font-medium text-slate-500">Switch between sleek Dark Mode and clean Light Mode</p>
           </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+            <p className="text-sm font-extrabold text-slate-800 dark:text-slate-200">
               Current Active Mode: <span className="text-indigo-600 dark:text-indigo-400 capitalize">{isDark ? 'Dark Mode' : 'Light Mode'}</span>
             </p>
-            <p className="text-xs text-slate-500 mt-0.5">Glassmorphic styling automatically adapts to dark backgrounds.</p>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">Glassmorphic styling automatically adapts to dark backgrounds.</p>
           </div>
 
           <Button variant="outline" size="md" onClick={toggleTheme}>
@@ -135,11 +135,11 @@ const SettingsPage = () => {
       </div>
 
       {/* Security Info Card */}
-      <div className="clay-panel p-6 flex items-center gap-4">
+      <div className="glass-panel p-6 flex items-center gap-4 border border-white/60 dark:border-white/10 shadow-xl">
         <Shield className="w-8 h-8 text-emerald-500 shrink-0" />
         <div>
-          <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">JWT Token Security Active</h4>
-          <p className="text-xs text-slate-500">
+          <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 font-heading">JWT Token Security Active</h4>
+          <p className="text-xs font-medium text-slate-500">
             All REST API requests are encrypted and authorized using BCrypt password hashing and JWT Bearer headers.
           </p>
         </div>

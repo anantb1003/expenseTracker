@@ -85,19 +85,19 @@ const BudgetsPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 clay-panel p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-6 border border-white/60 dark:border-white/10 shadow-xl">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 font-heading">
             Monthly Budgeting & Limits
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
             Track spent vs target budget per category to prevent overspending
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           {/* Month/Year selector */}
-          <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+          <div className="flex items-center gap-2 bg-white/60 dark:bg-slate-800/60 p-1.5 rounded-xl border border-white/30 dark:border-white/10 text-xs backdrop-blur-md shadow-sm">
             <select
               value={month}
               onChange={(e) => setMonth(Number(e.target.value))}
@@ -125,9 +125,9 @@ const BudgetsPage = () => {
 
       {/* Budget Progress Cards Grid */}
       {budgets.length === 0 ? (
-        <div className="clay-panel p-8 text-center">
+        <div className="glass-panel p-8 text-center border border-white/60 dark:border-white/10 shadow-xl">
           <PieChart className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-          <h3 className="font-bold text-slate-800 dark:text-slate-200">No budgets set for this month</h3>
+          <h3 className="font-extrabold text-slate-800 dark:text-slate-200 font-heading">No budgets set for this month</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
             Setting monthly budget targets gives you real-time alerts when reaching 80% and 100% capacity.
           </p>
@@ -146,18 +146,18 @@ const BudgetsPage = () => {
             else if (isWarning) progressColor = 'bg-amber-500';
 
             return (
-              <div key={b.id} className="clay-card p-6 relative overflow-hidden">
+              <div key={b.id} className="glass-card p-6 relative overflow-hidden border border-white/60 dark:border-white/10 shadow-xl">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div
-                      className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-md"
+                      className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-md border border-white/20"
                       style={{ backgroundColor: b.categoryColor || '#3B82F6' }}
                     >
                       <PieChart className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">{b.categoryName}</h3>
-                      <p className="text-[11px] text-slate-500">
+                      <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 font-heading">{b.categoryName}</h3>
+                      <p className="text-[11px] text-slate-500 font-medium">
                         {new Date(year, month - 1, 1).toLocaleString('default', { month: 'short' })} {year} Target
                       </p>
                     </div>
@@ -165,7 +165,7 @@ const BudgetsPage = () => {
 
                   <button
                     onClick={() => handleDeleteBudget(b.id)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 transition"
+                    className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 transition"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -174,18 +174,18 @@ const BudgetsPage = () => {
                 {/* Numbers Summary */}
                 <div className="flex items-baseline justify-between mb-2">
                   <div>
-                    <span className="text-xl font-extrabold text-slate-900 dark:text-slate-100">
+                    <span className="text-xl font-black text-slate-900 dark:text-slate-100 font-heading">
                       {formatAmount(b.spentAmount)}
                     </span>
-                    <span className="text-xs text-slate-500 ml-1">of {formatAmount(b.budgetAmount)}</span>
+                    <span className="text-xs text-slate-500 ml-1 font-medium">of {formatAmount(b.budgetAmount)}</span>
                   </div>
                   <span
-                    className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                    className={`text-xs font-black px-2.5 py-0.5 rounded-full backdrop-blur-md border ${
                       isCritical
-                        ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400'
+                        ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30'
                         : isWarning
-                        ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400'
-                        : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400'
+                        ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                        : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
                     }`}
                   >
                     {(b.percentageUsed || 0).toFixed(1)}%
@@ -193,15 +193,15 @@ const BudgetsPage = () => {
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
+                <div className="w-full h-3 bg-white/60 dark:bg-slate-800 rounded-full overflow-hidden mb-3 p-0.5 border border-white/30 dark:border-white/10">
                   <div
-                    className={`h-full ${progressColor} transition-all duration-500 rounded-full`}
+                    className={`h-full ${progressColor} transition-all duration-500 rounded-full shadow-sm`}
                     style={{ width: `${Math.min(100, b.percentageUsed || 0)}%` }}
                   />
                 </div>
 
                 {/* Footer Remaining Status */}
-                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-white/30 dark:border-white/10">
                   <span>
                     Remaining:{' '}
                     <span className={`font-bold ${b.remainingAmount < 0 ? 'text-rose-500' : 'text-slate-800 dark:text-slate-200'}`}>
